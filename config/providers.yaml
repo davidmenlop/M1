@@ -1,0 +1,35 @@
+# Precios en USD por 1M de tokens. VERIFICAR contra las páginas oficiales
+# antes de la entrega y actualizar la fecha.
+# Actualizado: 2026-10-22
+default_provider: openai
+
+providers:
+  openai:
+    models:
+      default:
+        id: gpt-4.1-mini          # confirmar ID vigente
+        temperature: 0.0
+        max_tokens: 700
+        pricing:
+          input_per_1m_usd: 0.40
+          output_per_1m_usd: 1.60
+
+  anthropic:
+    models:
+      default:
+        id: claude-haiku-4-5      # confirmar ID vigente
+        temperature: 0.0
+        max_tokens: 700
+        pricing:
+          input_per_1m_usd: 1.00
+          output_per_1m_usd: 5.00
+
+  mock:
+    models:
+      default:
+        id: mock-1
+        temperature: 0.0
+        max_tokens: 700
+        pricing:
+          input_per_1m_usd: 0.0
+          output_per_1m_usd: 0.0
