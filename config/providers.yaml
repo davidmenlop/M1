@@ -1,7 +1,7 @@
 # Precios en USD por 1M de tokens. VERIFICAR contra las páginas oficiales
 # antes de la entrega y actualizar la fecha.
 # Actualizado: 2026-10-22
-default_provider: openai
+default_provider: mock       # cambiar a openai en la Fase 3
 
 providers:
   openai:
@@ -17,8 +17,8 @@ providers:
   anthropic:
     models:
       default:
-        id: claude-haiku-4-5      # confirmar ID vigente
-        temperature: 0.0
+        id: claude-haiku-4-5      # ID presente en el SDK 2.1.0; precio de referencia $1/$5 por 1M: verificar
+        temperature: null         # la API rechaza el campo para este modelo (400): no se envía
         max_tokens: 700
         pricing:
           input_per_1m_usd: 1.00
