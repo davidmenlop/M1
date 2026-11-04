@@ -80,8 +80,8 @@ def _expect_prompt_error(body: dict, fragment: str) -> None:
 # --- Carga y render de las versiones reales -------------------------------------------
 
 
-def test_three_versions_available() -> None:
-    assert list_versions() == ["v1", "v2", "v3"]
+def test_four_versions_available() -> None:
+    assert list_versions() == ["v1", "v2", "v3", "v4"]
 
 
 def test_every_version_loads_and_renders_without_placeholders() -> None:
@@ -98,8 +98,8 @@ def test_v1_render_is_unchanged() -> None:
     assert TriageResponse.json_contract() in system
 
 
-def test_v2_and_v3_have_one_example_per_category() -> None:
-    for version in ("v2", "v3"):
+def test_v2_to_v4_have_one_example_per_category() -> None:
+    for version in ("v2", "v3", "v4"):
         categories = {ex.output["category"] for ex in load_prompt(version).examples}
         assert categories == {c.value for c in Category}, version
 
@@ -118,6 +118,18 @@ def test_v3_contract_puts_reasoning_first_and_required() -> None:
     assert set(TriageResponse.model_fields) <= set(schema["properties"])
 
 
+def test_v4_only_changes_rules_over_v3() -> None:
+    # v4 aísla el efecto de las reglas de negocio: mismos ejemplos, campos internos y seguridad.
+    v3, v4 = load_prompt("v3"), load_prompt("v4")
+    assert v4.examples == v3.examples
+    assert v4.internal_fields == v3.internal_fields
+    assert v4.user_template == v3.user_template
+    security = v3.system.split("## Seguridad")[1].split("## Categorías")[0]
+    assert security in v4.system
+    for rule in ("baja de la suscripción", "email que recibe las facturas", "datos incorrectos"):
+        assert rule in v4.system and rule not in v3.system, rule
+
+
 def test_v2_contract_has_no_internal_fields() -> None:
     schema = json.loads(load_prompt("v2").contract())
     assert "reasoning" not in schema["properties"]
@@ -127,7 +139,7 @@ def test_unknown_version_lists_available() -> None:
     try:
         load_prompt("v7")
     except PromptError as exc:
-        assert "v1, v2, v3" in str(exc)
+        assert "v1, v2, v3, v4" in str(exc)
         return
     raise AssertionError("una versión inexistente debió ser PromptError")
 

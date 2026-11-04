@@ -230,6 +230,15 @@
 - **Alternativas:** escribir también en `metrics.jsonl` (mezcla tráfico de evals con tráfico real); guardar solo el resumen (no se pueden revisar los errores caso por caso); guardar resultados parciales (se confunden con corridas completas).
 - **Consecuencias:** ~50 KB por corrida en git. Un resultado se puede invalidar comparando hashes si el prompt o el dataset cambiaron. Las dos primeras corridas de la Fase 6 se descartaron y repitieron por haberse hecho con el runner sin commitear.
 
+## ADR-027 — Prompt v4 creado después de ver dev, con confirmación obligatoria en holdout
+
+- **Fecha:** 2026-11-04
+- **Estado:** aceptada
+- **Contexto:** la revisión humana pasó `bil-03` (baja de la suscripción) y `bil-08` (email de facturas) a `account`. v2 y v3 dicen lo contrario y los tres modelos fallan `bil-03` con v1. Los prompts son inmutables (ADR-020), así que corregirlo exige una versión nueva, creada después de ver resultados en dev.
+- **Decisión:** v4 = v3 + la taxonomía y las reglas de desempate de la guía de etiquetado validada, y la regla de no inventar descuentos ni promociones. Mismos ejemplos, mismo campo interno y misma sección de seguridad que v3 (un test lo verifica), para que la diferencia se atribuya solo a las reglas. Entra a la comparativa con el mismo criterio (ADR-022). Si gana, su resultado en dev se reporta como optimista y la elección depende de que no caiga más de 0.10 en holdout.
+- **Alternativas:** editar v3 (rompe la trazabilidad de los resultados ya guardados); dejar el conflicto y aceptar el error (mide al modelo contra una regla que nadie le dio); agregar ejemplos parecidos a `bil-03` (sería entrenar con el examen).
+- **Consecuencias:** las reglas salen de la guía, no de los errores observados, pero se eligieron sabiendo cuáles casos fallaban: hay riesgo de sobreajuste a dev. El holdout tiene solo 8 casos, así que es una confirmación débil y así se reporta.
+
 ## ADR-011 — Rama `master`
 
 - **Fecha:** 2026-10-22
