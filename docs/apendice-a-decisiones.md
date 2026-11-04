@@ -89,20 +89,20 @@
 ## ADR-010 — `temperature: 0.0`
 
 - **Fecha:** 2026-10-22
-- **Estado:** aceptada para OpenAI (pendiente Fase 3). **Matizada por ADR-016:** no aplica a `claude-haiku-4-5`, que no acepta el parámetro.
+- **Estado:** aceptada para OpenAI (verificada con llamada real en la Fase 3). **No aplica a Anthropic** (ADR-016): su API rechaza la temperatura en todos los modelos.
 - **Contexto:** la tarea es clasificación y extracción, no generación creativa.
 - **Decisión:** temperatura 0 en todos los proveedores, configurable por YAML.
 - **Alternativas:** 0.2–0.7 para respuestas más naturales.
 - **Consecuencias:** mayor determinismo y comparabilidad entre corridas; respuestas potencialmente más repetitivas.
 
-## ADR-012 — `mock` como proveedor por defecto hasta la Fase 3
+## ADR-012 — `mock` como proveedor por defecto
 
-- **Fecha:** 2026-10-27
-- **Estado:** aceptada
-- **Contexto:** `.env.example` decía `DEFAULT_PROVIDER=openai`, pero el proveedor aún no existe. Copiar el ejemplo rompía la CLI en el primer uso.
-- **Decisión:** `DEFAULT_PROVIDER=mock` y `default_provider: mock` en `providers.yaml` durante la Fase 2. Se vuelve a `openai` en la Fase 3.
-- **Alternativas:** dejar `openai` y documentar `--provider mock` en cada comando; implementar OpenAI antes de tiempo.
-- **Consecuencias:** el repo funciona desde un clon limpio sin credenciales. Hay que acordarse de cambiar el default en la Fase 3; queda marcado con un comentario en el YAML.
+- **Fecha:** 2026-10-27 · **Revisada:** 2026-11-04
+- **Estado:** aceptada (revisada en la Fase 3)
+- **Contexto:** `.env.example` decía `DEFAULT_PROVIDER=openai`, pero el proveedor aún no existía. Copiar el ejemplo rompía la CLI en el primer uso. La versión original de esta ADR preveía volver a `openai` en la Fase 3.
+- **Decisión:** `mock` queda como default **de forma permanente**. Los proveedores reales se eligen con `--provider openai|anthropic` o con `DEFAULT_PROVIDER` en el `.env` local.
+- **Alternativas:** volver a `openai` en la Fase 3, como se planeó (un clon limpio sin clave falla en el primer comando del README).
+- **Consecuencias:** `git clone` → instalar → `python -m src.main --query ...` funciona sin credenciales, que es lo que evalúa la rúbrica de reproducibilidad. Quien tenga claves cambia una variable.
 
 ## ADR-013 — Métricas con hash de la consulta, no con el texto
 
@@ -131,23 +131,41 @@
 - **Alternativas:** dejar el reintento del SDK (menos código, métricas incompletas); sumar ambos (reintentos multiplicados y costo oculto).
 - **Consecuencias:** el costo y el número de intentos reflejan lo que realmente se envió. Los errores se clasifican en tres grupos: `ProviderError` (reintentable), `ProviderFatalError` (clave inválida, modelo inexistente, request mal formada; no se reintenta) y `ProviderUnavailable` (sin clave, detectado antes de llamar).
 
-## ADR-016 — Temperatura configurable por modelo; omitida para `claude-haiku-4-5`
+## ADR-016 — Anthropic no envía parámetros de muestreo
 
-- **Fecha:** 2026-10-28
-- **Estado:** aceptada (reemplaza el supuesto inicial de enviarla siempre)
-- **Contexto:** la primera llamada real con `temperature` enviada por `extra_body` devolvió `400 invalid_request_error: temperature: Extra inputs are not permitted`. El modelo no acepta el campo.
-- **Decisión:** `temperature` pasa a ser `float | null` en `providers.yaml`. Si es `null`, el proveedor no envía el campo. Para `claude-haiku-4-5` es `null`. Si un modelo sí lo acepta, se configura un número y se envía.
-- **Alternativas:** reintentar sin temperatura por error (oculta el problema y duplica llamadas); forzar `temperature` en todos los modelos (rompe este); actualizar el SDK (no lo resuelve: el rechazo es del modelo, no del cliente).
-- **Consecuencias:** **ADR-010 no se cumple para este proveedor**: el modelo elige su propia aleatoriedad, y dos corridas idénticas pueden dar salidas distintas. La comparativa de la Fase 7 tiene que tenerlo en cuenta, y las evals deben repetirse para medir varianza.
+- **Fecha:** 2026-10-28 · **Corregida:** 2026-11-04
+- **Estado:** aceptada (corrige el diagnóstico original)
+- **Contexto:** la primera llamada real con `temperature` devolvió `400 invalid_request_error: temperature: Extra inputs are not permitted`. El diagnóstico original fue que *`claude-haiku-4-5` no acepta el parámetro*. **Era incorrecto.** El SDK 2.1.0 envía `anthropic-version: 2026-10-21` (`anthropic/_constants.py`), y desde esa versión de la API `temperature`, `top_p` y `top_k` devuelven 400 en **todos** los modelos de Claude. Por eso el SDK tampoco los expone como parámetros.
+- **Decisión:** `AnthropicProvider` nunca envía muestreo. Si `providers.yaml` configura una `temperature` para Anthropic, el proveedor falla con `ProviderFatalError` **antes** de llamar a la red, con un mensaje que explica el motivo. En los modelos que piensan (Haiku 5.5), la variabilidad y el costo se controlan con `effort` (ADR-019).
+- **Alternativas:** ignorar en silencio la temperatura configurada (oculta la diferencia entre lo que dice el YAML y lo que se envía); fijar el SDK a una versión anterior (contradice tener deps actuales y solo posterga el problema).
+- **Consecuencias:** **ADR-010 no se cumple para Anthropic**: no hay forma de pedir temperatura 0 con esta API. Dos corridas idénticas pueden dar salidas distintas; las evals de la Fase 7 deben repetirse para medir la varianza. OpenAI (`gpt-4.1-mini`) sí acepta `temperature: 0.0`, lo que vuelve más determinista esa columna de la comparativa.
 
 ## ADR-017 — Verificación real: la llamada a la API se prueba antes de cerrar la fase
 
 - **Fecha:** 2026-10-28
 - **Estado:** aceptada
-- **Contexto:** los tests con cliente falso no detectaron que el modelo rechaza `temperature`. Solo lo mostró la llamada real.
+- **Contexto:** los tests con cliente falso no detectaron que la API rechaza `temperature`. Solo lo mostró la llamada real. Y aun con la llamada real, la causa se atribuyó mal al modelo (ADR-016): un error se verifica contra la documentación, no solo contra el mensaje.
 - **Decisión:** cada proveedor se considera verificado únicamente después de una llamada real exitosa, registrada en `metrics.jsonl`. Los tests con cliente falso validan la lógica, no el contrato con la API.
 - **Alternativas:** confiar en el SDK y en los tests simulados (ya falló una vez).
 - **Consecuencias:** la verificación real requiere clave y gasta tokens; se hace una vez por proveedor y por cambio de modelo.
+
+## ADR-018 — OpenAI con Chat Completions y JSON mode
+
+- **Fecha:** 2026-11-04
+- **Estado:** aceptada
+- **Contexto:** la Fase 3 necesita un segundo proveedor real con el mismo contrato. El SDK `openai==3.37.0` ofrece Chat Completions, con `response_format` para JSON mode y JSON Schema estricto.
+- **Decisión:** `chat.completions.create` con `response_format={"type": "json_object"}`, `max_completion_tokens` (no el obsoleto `max_tokens`) y `temperature` solo si no es `null`. `max_retries=0` en el cliente, igual que en Anthropic (ADR-015). El schema lo sigue validando Pydantic.
+- **Alternativas:** `json_schema` estricto (garantiza el schema, pero acopla el proveedor al contrato y hace que la comparativa con Anthropic sea desigual); sin JSON mode (más reintentos por texto alrededor del JSON).
+- **Consecuencias:** OpenAI siempre devuelve JSON parseable; los errores posibles quedan en el nivel del schema (campos faltantes o valores inválidos), que el pipeline ya reintenta con feedback. La comparación entre proveedores es justa: los dos reciben el mismo prompt y pasan por la misma validación.
+
+## ADR-019 — Varios modelos por proveedor; Haiku 5.5 con `effort: low`
+
+- **Fecha:** 2026-11-04
+- **Estado:** aceptada; **Haiku 5.5 sin verificar con llamada real** (la cuenta de Anthropic no tenía saldo)
+- **Contexto:** `claude-haiku-4-5` es de la generación anterior. El Haiku actual, `claude-haiku-5-5`, cuesta $0.10 / $0.50 por 1M tokens, 10 veces menos. A diferencia de 4.5, piensa por defecto con `effort: medium`, y el thinking consume `max_tokens` y se factura como salida.
+- **Decisión:** `providers.yaml` admite varios modelos por proveedor, elegidos con `--model <clave>` (por defecto, `default`). Se agrega `anthropic.haiku-5-5` con `effort: low` (clasificación simple) y `max_tokens: 2000` para dejar margen al thinking. `default` sigue siendo Haiku 4.5 hasta que la Fase 7 decida con datos.
+- **Alternativas:** reemplazar 4.5 por 5.5 directamente (se pierde la comparación); desactivar el thinking (posible en Haiku 5.5 con effort ≤ high, pero `low` deja que el modelo decida y suele ser suficiente).
+- **Consecuencias:** la comparativa de la Fase 7 puede incluir 3 modelos reales sin tocar código. `effort` es un campo nuevo del contrato `LLMProvider.complete`: Anthropic lo envía como `output_config.effort` y OpenAI como `reasoning_effort`.
 
 ## ADR-011 — Rama `master`
 

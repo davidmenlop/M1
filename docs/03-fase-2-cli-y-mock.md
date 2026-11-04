@@ -335,7 +335,7 @@ Se adelantó la parte de Anthropic de la Fase 3. OpenAI sigue pendiente.
 - `max_retries=0` en el cliente: la política de reintentos es solo la del pipeline (ADR-015).
 - Errores clasificados en `ProviderError` (429, 5xx, timeout, conexión), `ProviderFatalError` (401, 403, 404, 400) y `ProviderUnavailable` (sin clave).
 - Un error fatal no se convierte en fallback: se muestra como error de uso con código `2`, porque reintentar una clave inválida no sirve.
-- La temperatura es configurable por modelo. Para `claude-haiku-4-5` está en `null` y no se envía (ADR-016).
+- La temperatura es configurable por modelo. En Anthropic está en `null` y no se envía (ADR-016; ver la corrección en §9.1).
 
 ```bash
 .venv/bin/python -m src.main --query "me cobraron dos veces" --provider anthropic
@@ -357,6 +357,8 @@ error: el proveedor 'anthropic' rechazó la solicitud: BadRequestError: Error co
 Los tests simulados no lo detectaron, porque el cliente falso acepta cualquier argumento. Por eso se agregó ADR-017: un proveedor se considera verificado solo tras una llamada real.
 
 El fix fue hacer la temperatura opcional por modelo y no enviarla cuando el modelo no la acepta (ADR-016). El error 400 se clasifica como fatal, así que no se reintenta: reintentarlo habría gastado llamadas sin cambiar nada.
+
+> **Corrección (Fase 3, 2026-11-04).** El diagnóstico de arriba era incorrecto: el rechazo no es del modelo. El SDK 2.1.0 envía `anthropic-version: 2026-10-21`, y desde esa versión la API rechaza `temperature`, `top_p` y `top_k` en **todos** los modelos de Claude. El código ahora nunca envía muestreo a Anthropic y falla antes de llamar a la red si alguien lo configura. Detalle en el Capítulo 4, §5 y en ADR-016.
 
 ### 9.2 Prueba real exitosa
 
@@ -391,4 +393,4 @@ Lo que confirma esta corrida:
 
 ---
 
-**Anterior:** [Capítulo 2 — El contrato](02-fase-1-contrato.md) · **Siguiente:** Capítulo 4 — Multi-proveedor (Fase 3, pendiente)
+**Anterior:** [Capítulo 2 — El contrato](02-fase-1-contrato.md) · **Siguiente:** [Capítulo 4 — Multi-proveedor](04-fase-3-multi-proveedor.md)

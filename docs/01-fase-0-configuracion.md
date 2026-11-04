@@ -249,7 +249,7 @@ providers:
     models:
       default:
         id: claude-haiku-4-5      # confirmar ID vigente
-        temperature: null         # rechazado por la API para este modelo (ADR-016)
+        temperature: null         # la API 2026-10-21 lo rechaza en todos los modelos (ADR-016)
         max_tokens: 700
         pricing:
           input_per_1m_usd: 1.00
@@ -273,7 +273,7 @@ Por qué en YAML y no en `.py`:
 - es auditable: se ve la fecha de actualización;
 - el bloque `mock` con precio 0 permite que todo el pipeline corra sin gastar.
 
-`temperature: 0.0` es la intención para clasificación y extracción (determinismo). **Excepción verificada:** `claude-haiku-4-5` rechaza el parámetro, así que su valor es `null` (ver Capítulo 3, §9.1 y ADR-016).
+`temperature: 0.0` es la intención para clasificación y extracción (determinismo). **Excepción:** la API de Anthropic, desde la versión `2026-10-21` que envía el SDK, rechaza la temperatura en todos los modelos, así que en Anthropic vale `null` (ver Capítulo 3, §9.1 y ADR-016). El archivo completo y vigente, con varios modelos por proveedor, está en el Capítulo 4.
 
 ### 4.8 Crear el entorno e instalar
 

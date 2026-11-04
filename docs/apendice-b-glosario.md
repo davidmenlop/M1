@@ -24,7 +24,9 @@
 
 **Structured output.** Forzar que la salida respete un esquema (JSON Schema). Reduce el parseo frágil.
 
-**Temperatura.** Parámetro de aleatoriedad. `0.0` ≈ determinista; valores altos aumentan variedad y riesgo.
+**Temperatura.** Parámetro de aleatoriedad. `0.0` ≈ determinista; valores altos aumentan variedad y riesgo. OpenAI la acepta; la API de Anthropic (versión `2026-10-21`) la rechaza en todos los modelos.
+
+**Effort.** Nivel de esfuerzo de razonamiento (`low` a `max`) en los modelos que piensan antes de responder. Más esfuerzo implica más tokens de thinking, que se facturan como salida. En Anthropic se envía como `output_config.effort`; en OpenAI, como `reasoning_effort`.
 
 ## Contrato y validación
 
