@@ -109,7 +109,7 @@ Acciones esperadas:   Ubicar y enviar la factura
 - `--all` vuelve a revisar todo; `--id acc-04` revisa un caso puntual.
 - Sin una terminal interactiva (por ejemplo, desde un pipe) se niega a correr con código 2. Se probó con una pseudo-terminal (pty) sobre una copia del dataset: aceptar, cambiar con nota, disputar y saltar quedaron guardados como se esperaba.
 
-**Estado al cerrar este capítulo:** 40/40 casos en `draft`, pendientes de revisión humana.
+**Resultado de la revisión (2026-11-04):** 40/40 casos validados, con 95 % de acuerdo con el borrador. Se cambiaron dos casos de `billing` a `account`: `bil-03` (dar de baja la suscripción: *"es la finalización del servicio, la cuenta se daría de baja"*) y `bil-08` (email de facturas: *"deben actualizar la información de la cuenta"*). La guía de etiquetado se actualizó (reglas 3 y 4) para reflejar esas decisiones. **Consecuencia:** v2 y v3 ubican la cancelación en billing, así que contradicen la etiqueta humana en `bil-03`. Como los prompts son inmutables (ADR-020), se resuelve en la Fase 7.
 
 ## 7. Validación
 
@@ -155,8 +155,8 @@ Resultado sobre el borrador: estructura OK, sin leakage. La similitud máxima en
 - [x] validador con chequeo de leakage y duplicados
 - [x] herramienta de revisión probada sobre una copia
 - [x] 90/90 tests
-- [ ] **40/40 casos validados por una persona** (`validate_dataset.py --strict` en verde)
+- [x] **40/40 casos validados por una persona** (`validate_dataset.py --strict` en verde)
 
 ---
 
-**Anterior:** [Capítulo 5 — Prompts versionados](05-fase-4-prompts.md) · **Siguiente:** Capítulo 7 — Suite de evals (Fase 6, pendiente)
+**Anterior:** [Capítulo 5 — Prompts versionados](05-fase-4-prompts.md) · **Siguiente:** [Capítulo 7 — Suite de evals](07-fase-6-evals.md)

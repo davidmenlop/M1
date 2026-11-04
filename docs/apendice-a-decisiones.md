@@ -221,6 +221,15 @@
 - **Alternativas:** tickets reales anonimizados (más realistas, pero no existen y anonimizar bien es difícil); generarlos con un LLM (tienden a ser homogéneos y "de libro").
 - **Consecuencias:** sin datos personales en el repo. El dataset es más limpio que el soporte real: las métricas son una cota optimista, y así se reporta.
 
+## ADR-026 — Resultados de evals autocontenidos y separados de las métricas de producción
+
+- **Fecha:** 2026-11-04
+- **Estado:** aceptada
+- **Contexto:** la comparativa de la Fase 7 se va a leer y defender después de correrla. Un número sin el prompt, el dataset y el código exactos que lo produjeron no es evidencia. Además, el pipeline ya escribe `data/metrics.jsonl` en cada request de la CLI.
+- **Decisión:** cada corrida guarda un JSON en `evals/results/` (versionado) con el sha256 del prompt, el sha256 del dataset, el commit y si el árbol estaba sucio, la configuración del modelo, las métricas y cada caso. El runner **no** escribe en `metrics.jsonl`. Ante un error fatal, aborta sin guardar. Solo cuentan como evidencia las corridas con `dirty: false`.
+- **Alternativas:** escribir también en `metrics.jsonl` (mezcla tráfico de evals con tráfico real); guardar solo el resumen (no se pueden revisar los errores caso por caso); guardar resultados parciales (se confunden con corridas completas).
+- **Consecuencias:** ~50 KB por corrida en git. Un resultado se puede invalidar comparando hashes si el prompt o el dataset cambiaron. Las dos primeras corridas de la Fase 6 se descartaron y repitieron por haberse hecho con el runner sin commitear.
+
 ## ADR-011 — Rama `master`
 
 - **Fecha:** 2026-10-22

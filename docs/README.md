@@ -5,7 +5,7 @@
 > De un repositorio vacío a un servicio multi-proveedor, con contrato validado,
 > evals ejecutables, guardrails y métricas auditables.
 
-**Estado del manual:** v0.6 — capítulos 0 a 6 completos.
+**Estado del manual:** v0.7 — capítulos 0 a 7 completos.
 **Última actualización:** 2026-11-04.
 **Fuente de verdad:** el código del repositorio. Si el manual y el código difieren, gana el código; el manual se corrige en el mismo commit.
 
@@ -41,8 +41,8 @@ La regla es simple: **ninguna decisión técnica se sostiene con intuición**. S
 | [3 — CLI y mock](03-fase-2-cli-y-mock.md) | Fase 2 | CLI, `MockProvider`, pipeline con reintento, métricas JSONL | ✅ |
 | [4 — Multi-proveedor](04-fase-3-multi-proveedor.md) | Fase 3 | Abstracción `LLMProvider`, OpenAI, Anthropic, `--model`, corrección de la temperatura | ✅ |
 | [5 — Prompts versionados](05-fase-4-prompts.md) | Fase 4 | YAML v1/v2/v3, campos internos, criterio de selección | ✅ |
-| [6 — Dataset](06-fase-5-dataset.md) | Fase 5 | 40 casos, guía de etiquetado, revisión humana, leakage | 🟡 pendiente de validación humana |
-| 7 — Suite de evals | Fase 6 | Runner, métricas globales y por categoría | ⏳ |
+| [6 — Dataset](06-fase-5-dataset.md) | Fase 5 | 40 casos, guía de etiquetado, revisión humana, leakage | ✅ |
+| [7 — Suite de evals](07-fase-6-evals.md) | Fase 6 | Runner, métricas, umbrales, resultados trazables | ✅ |
 | 8 — Iteración empírica | Fase 7 | Comparativa prompts × proveedores y elección con datos | ⏳ |
 | 9 — Guardrails | Fase 8 | Entrada, salida y medición de su efecto | ⏳ |
 | 10 — Suite adversarial | Fase 9 | 10 ataques, mitigación y tasa de bloqueo | ⏳ |
@@ -73,12 +73,12 @@ El manual es Markdown plano, sin dependencias. Si querés un PDF o un `.docx`:
 ```bash
 # PDF con tabla de contenidos
 pandoc docs/00-introduccion.md docs/01-fase-0-configuracion.md docs/02-fase-1-contrato.md \
-  docs/03-fase-2-cli-y-mock.md docs/04-fase-3-multi-proveedor.md docs/05-fase-4-prompts.md docs/06-fase-5-dataset.md docs/apendice-a-decisiones.md docs/apendice-b-glosario.md \
+  docs/03-fase-2-cli-y-mock.md docs/04-fase-3-multi-proveedor.md docs/05-fase-4-prompts.md docs/06-fase-5-dataset.md docs/07-fase-6-evals.md docs/apendice-a-decisiones.md docs/apendice-b-glosario.md \
   -o manual.pdf --toc --number-sections
 
 # DOCX
 pandoc docs/00-introduccion.md docs/01-fase-0-configuracion.md docs/02-fase-1-contrato.md \
-  docs/03-fase-2-cli-y-mock.md docs/04-fase-3-multi-proveedor.md docs/05-fase-4-prompts.md docs/06-fase-5-dataset.md \
+  docs/03-fase-2-cli-y-mock.md docs/04-fase-3-multi-proveedor.md docs/05-fase-4-prompts.md docs/06-fase-5-dataset.md docs/07-fase-6-evals.md \
   -o manual.docx --toc
 ```
 
@@ -93,6 +93,7 @@ pandoc docs/00-introduccion.md docs/01-fase-0-configuracion.md docs/02-fase-1-co
 | 0.1 | 2026-10-22 | Capítulos 0–2, apéndices A y B |
 | 0.2 | 2026-10-27 | Capítulo 3 (Fase 2): CLI, mock, pipeline, métricas. ADR-012 a ADR-014 |
 | 0.3 | 2026-10-28 | Proveedor Anthropic verificado con llamada real. Temperatura opcional por modelo. ADR-015 a ADR-017 |
+| 0.7 | 2026-11-04 | Capítulo 7 (Fase 6): runner de evals, primera corrida real. Validación humana del dataset. ADR-026 |
 | 0.6 | 2026-11-04 | Capítulo 6 (Fase 5): dataset, guía de etiquetado, revisión humana. ADR-023 a ADR-025 |
 | 0.5 | 2026-11-04 | Capítulo 5 (Fase 4): prompts v2 y v3, criterio de selección. ADR-020 a ADR-022 |
 | 0.4 | 2026-11-04 | Capítulo 4 (Fase 3): OpenAI verificado, varios modelos por proveedor, Haiku 5.5. ADR-016 corregida, ADR-012 revisada, ADR-018 y ADR-019 |

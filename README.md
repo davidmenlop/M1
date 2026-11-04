@@ -3,9 +3,10 @@
 Servicio que recibe una consulta de soporte en texto libre y devuelve un JSON validado
 con `{answer, confidence, category, actions}`, con métricas de tokens, latencia y costo.
 
-> **Estado:** en construcción. Fases 0–4 completas: contrato, CLI, pipeline con
-> reintento y fallback, métricas, proveedores OpenAI y Anthropic, y prompts v1/v2/v3.
-> Faltan dataset, suite de evals, comparativa y guardrails.
+> **Estado:** en construcción. Fases 0–6 completas: contrato, CLI, pipeline con
+> reintento y fallback, métricas, proveedores OpenAI y Anthropic, prompts v1/v2/v3,
+> dataset de 40 casos validado por una persona y suite de evals. Faltan la
+> comparativa de prompts y modelos, y los guardrails.
 >
 > Este README se completa en el Capítulo 12 del manual. Por ahora, el documento
 > principal del proyecto es el libro de construcción.
@@ -23,6 +24,7 @@ trade-offs y el código explicado.
 - [Capítulo 4 — Multi-proveedor](docs/04-fase-3-multi-proveedor.md)
 - [Capítulo 5 — Prompts versionados](docs/05-fase-4-prompts.md)
 - [Capítulo 6 — Dataset](docs/06-fase-5-dataset.md)
+- [Capítulo 7 — Suite de evals](docs/07-fase-6-evals.md)
 - [Apéndice A — Decisiones (ADR)](docs/apendice-a-decisiones.md)
 - [Apéndice B — Glosario](docs/apendice-b-glosario.md)
 
@@ -59,7 +61,8 @@ python tests/test_anthropic_provider.py   # 15/15 tests pasaron (cliente falso, 
 python tests/test_openai_provider.py      # 13/13 tests pasaron (cliente falso, sin red)
 python tests/test_prompts.py              # 16/16 tests pasaron
 python tests/test_dataset.py              # 21/21 tests pasaron
-python evals/validate_dataset.py          # estructura, balance y leakage del dataset
+python tests/test_eval_metrics.py         # 14/14 tests pasaron
+python evals/validate_dataset.py --strict # dataset validado: estructura, balance y leakage
 python -m src.main --query "Me cobraron dos veces la suscripción"   # JSON validado (proveedor mock)
 ```
 
@@ -84,6 +87,27 @@ echo "No puedo iniciar sesión" | python -m src.main --query -
 JSON del contrato a stdout; logs a stderr; una línea por request en `data/metrics.jsonl`.
 Los modelos, sus parámetros y sus precios están en `config/providers.yaml`.
 
+## Evaluación
+
+```bash
+python evals/runner.py --provider mock                     # sin claves
+python evals/runner.py --provider openai --prompt v2       # split dev (32 casos)
+python evals/runner.py --provider anthropic --repeat 3     # media y desvío
+python evals/runner.py --compare evals/results/*.json      # tabla comparativa
+```
+
+Solo se evalúan casos validados por una persona (`evals/dataset.jsonl`, 32 dev / 8 holdout).
+Cada corrida guarda en `evals/results/` las métricas, cada caso y los hashes del prompt
+y del dataset. Resultados actuales:
+
+| corrida | proveedor / modelo | prompt | split | casos | schema | retry | accuracy | macro-F1 | recall mín | action | Brier | USD/req | p95 s |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 20261104-175711 | mock / mock-1 | v1 | dev | 32×1 | 100% | 0% | 59% | 0.567 | 25% | 0.406 | 0.219 | 0.00000 | 0.000 |
+| 20261104-175754 | openai / gpt-4.1-mini | v1 | dev | 32×1 | 100% | 0% | 91% | 0.908 | 78% | 0.859 | 0.089 | 0.00037 | 1.863 |
+
+El mock es la línea base de un clasificador por palabras clave. La comparativa completa
+y la elección del prompt, con el criterio declarado de antemano, llegan en la Fase 7.
+
 ## Estado por fase
 
 | Fase | Alcance | Estado |
@@ -93,8 +117,8 @@ Los modelos, sus parámetros y sus precios están en `config/providers.yaml`.
 | 2 | CLI + `MockProvider` + pipeline + métricas | ✅ |
 | 3 | Multi-proveedor y retry | ✅ |
 | 4 | Prompts versionados | ✅ |
-| 5 | Dataset de evaluación | 🟡 40 casos en borrador, pendientes de validación humana |
-| 6 | Suite de evals | ⏳ |
+| 5 | Dataset de evaluación | ✅ 40 casos validados por una persona |
+| 6 | Suite de evals | ✅ |
 | 7 | Comparativa empírica | ⏳ |
 | 8 | Guardrails | ⏳ |
 | 9 | Suite adversarial | ⏳ |
