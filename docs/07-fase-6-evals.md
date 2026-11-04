@@ -21,7 +21,9 @@ evals/
 ├── runner.py      # CLI: corre, reporta, guarda y compara
 └── results/
     ├── 20261104-175711_mock-default_v1_dev.json
-    └── 20261104-175754_openai-default_v1_dev.json
+    ├── 20261104-175754_openai-default_v1_dev.json
+    ├── 20261104-232242_anthropic-default_v1_dev.json
+    └── 20261104-232345_anthropic-haiku-5-5_v1_dev.json
 tests/test_eval_metrics.py   # 14 tests, con valores calculados a mano
 ```
 
@@ -70,11 +72,13 @@ Las métricas se prueban contra un escenario de 6 casos **calculado a mano** (pr
 
 ### 5.2 Corridas de referencia
 
-Las dos corridas salen del commit `831835b` con el árbol limpio:
+Las corridas de mock y OpenAI salen del commit `831835b`; las de Anthropic, del `d276cc7` (cuando la cuenta tuvo saldo). Todas con el árbol limpio:
 
 ```bash
 .venv/bin/python evals/runner.py --provider mock
 .venv/bin/python evals/runner.py --provider openai --prompt v1
+.venv/bin/python evals/runner.py --provider anthropic --prompt v1
+.venv/bin/python evals/runner.py --provider anthropic --model haiku-5-5 --prompt v1
 .venv/bin/python evals/runner.py --compare evals/results/*.json
 ```
 
@@ -82,6 +86,8 @@ Las dos corridas salen del commit `831835b` con el árbol limpio:
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | 20261104-175711 | mock / mock-1 | v1 | dev | 32×1 | 100% | 0% | 59% | 0.567 | 25% | 0.406 | 0.219 | 0.00000 | 0.000 |
 | 20261104-175754 | openai / gpt-4.1-mini | v1 | dev | 32×1 | 100% | 0% | 91% | 0.908 | 78% | 0.859 | 0.089 | 0.00037 | 1.863 |
+| 20261104-232242 | anthropic / claude-haiku-4-5 | v1 | dev | 32×1 | 100% | 3% | 97% | 0.969 | 89% | 0.859 | 0.051 | 0.00169 | 3.429 |
+| 20261104-232345 | anthropic / claude-haiku-5-5 | v1 | dev | 32×1 | 100% | 0% | 91% | 0.908 | 78% | 0.922 | 0.107 | 0.00022 | 2.283 |
 
 **El mock es la línea base:** un clasificador por palabras clave saca 59 %. Un modelo que no lo supere por mucho no justifica su costo.
 
@@ -97,12 +103,31 @@ OpenAI con v1, matriz de confusión:
 
 Se corrió dos veces (antes y después de commitear el runner). La **clasificación fue idéntica** (accuracy 91 %, los mismos 3 errores), pero el texto de las acciones varió: el action score pasó de 0.875 a 0.859, y el Brier de 0.088 a 0.089. Conclusión: `temperature: 0.0` reduce la varianza pero **no garantiza determinismo**. Una diferencia de 0.016 en action score es ruido, y eso confirma el umbral de empate de 0.03 (ADR-022).
 
+### 5.3 Anthropic
+
+Cada modelo se corrió dos veces: la primera quedó `dirty` (una prueba por CLI había escrito en `data/metrics.jsonl`, que está versionado) y se descartó. Entre las dos corridas, **la clasificación fue idéntica** en ambos modelos, aunque Anthropic no acepta temperatura; solo variaron algunas centésimas en confidence y latencia. Igual, la Fase 7 usa 3 repeticiones (ADR-022): dos corridas no alcanzan para estimar la varianza.
+
+| | Haiku 4.5 | Haiku 5.5 | gpt-4.1-mini |
+|---|---|---|---|
+| macro-F1 | **0.969** | 0.908 | 0.908 |
+| errores | bil-03 | bil-03, bil-08, tec-06 | bil-03, bil-08, oth-01 |
+| action score | 0.859 | **0.922** | 0.859 |
+| confidence aciertos / errores | 0.91 / 0.95 | 0.83 / 0.80 | 0.93 / 0.93 |
+| USD por request | 0.00169 | **0.00022** | 0.00037 |
+| p95 (s) | 3.43 | 2.28 | **1.86** |
+
+- **Haiku 4.5** es el más preciso con v1 (solo falla `bil-03`) y el más caro: ~8 veces Haiku 5.5. Tuvo un reintento (`bil-07`).
+- **Haiku 5.5** empata en macro-F1 con OpenAI, tiene el mejor action score, es el más barato y no necesitó reintentos. Su error nuevo es `tec-06` (reporte de ventas que no cuadra con las facturas → billing), justo la trampa que el caso busca.
+- **`bil-03` falla en los tres modelos.** Confirma que la regla "fin del servicio → account" no se infiere: hay que escribirla en el prompt.
+- **La confidence sigue sin servir para escalar.** Haiku 4.5 está *más* seguro en su error (0.95) que en sus aciertos.
+- **Inventar políticas no es exclusivo de OpenAI.** En `oth-01`, Haiku 4.5 clasifica bien pero responde *"Sí, ofrecemos descuentos por pago anual… generalmente entre 15 % y 20 %"*, con porcentajes inventados. Haiku 5.5 deriva a una persona sin prometer nada.
+
 ## 6. Lo que ya dicen los datos (antes de la Fase 7)
 
 1. **Los 3 errores son los casos discutibles.** `bil-03` (baja de la suscripción) y `bil-08` (email de facturas) son los dos que la revisión humana pasó de billing a account. `oth-01` (descuento por pago anual) estaba marcado como ambiguo. El modelo coincide con el borrador del asistente, no con la decisión del negocio. Esa regla no se infiere: hay que escribirla en el prompt. Ojo: **v2 y v3 dicen explícitamente lo contrario** ("cancelación de la suscripción" en billing), así que van a fallar `bil-03` por diseño.
 2. **La `confidence` no sirve para escalar.** Promedia 0.93 en errores y 0.93 en aciertos. El Brier bajo (0.088) viene de la accuracy alta, no de la calibración. Usar `confidence < X` para derivar a un humano, con v1, no filtraría los errores.
 3. **v1 inventa políticas.** En `oth-01` responde *"Sí, ofrecemos descuentos por pago anual adelantado"*, algo que no figura en ningún lado. v2 y v3 tienen la regla "no inventes políticas"; el action score y las keywords no lo detectan. Queda como criterio cualitativo para la Fase 7 y como candidato a guardrail de salida (Fase 8).
-4. **Costo:** USD 0.00037 por request y unos USD 0.012 por corrida de 32 casos. La comparativa completa de la Fase 7 (3 prompts × 3 modelos, con 3 repeticiones en Anthropic) cuesta menos de USD 1, y el grueso es Haiku 4.5 (unas 5 veces más caro por request que `gpt-4.1-mini`).
+4. **Costo:** USD 0.00037 por request y unos USD 0.012 por corrida de 32 casos. La comparativa completa de la Fase 7 (3 prompts × 3 modelos, con 3 repeticiones en Anthropic) cuesta alrededor de USD 1, y unos USD 0.80 son de Haiku 4.5 (unas 5 veces más caro por request que `gpt-4.1-mini` y 8 veces más que Haiku 5.5; v2 y v3 tienen prompts más largos).
 
 ## 7. Decisiones y trade-offs
 
@@ -131,7 +156,7 @@ Se corrió dos veces (antes y después de commitear el runner). La **clasificaci
 - [x] `--compare` genera la tabla markdown
 - [x] corrida completa con mock y con OpenAI, guardadas en `evals/results/`
 - [x] métricas validadas contra valores calculados a mano; 105/105 tests
-- [ ] corrida con Anthropic (pendiente de saldo)
+- [x] corridas con Anthropic (Haiku 4.5 y Haiku 5.5)
 
 ---
 

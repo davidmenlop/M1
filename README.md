@@ -104,8 +104,11 @@ y del dataset. Resultados actuales:
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | 20261104-175711 | mock / mock-1 | v1 | dev | 32×1 | 100% | 0% | 59% | 0.567 | 25% | 0.406 | 0.219 | 0.00000 | 0.000 |
 | 20261104-175754 | openai / gpt-4.1-mini | v1 | dev | 32×1 | 100% | 0% | 91% | 0.908 | 78% | 0.859 | 0.089 | 0.00037 | 1.863 |
+| 20261104-232242 | anthropic / claude-haiku-4-5 | v1 | dev | 32×1 | 100% | 3% | 97% | 0.969 | 89% | 0.859 | 0.051 | 0.00169 | 3.429 |
+| 20261104-232345 | anthropic / claude-haiku-5-5 | v1 | dev | 32×1 | 100% | 0% | 91% | 0.908 | 78% | 0.922 | 0.107 | 0.00022 | 2.283 |
 
-El mock es la línea base de un clasificador por palabras clave. La comparativa completa
+El mock es la línea base de un clasificador por palabras clave. Con v1, Haiku 4.5 es el
+más preciso y Haiku 5.5 el más barato; `bil-03` falla en los tres modelos. La comparativa completa
 y la elección del prompt, con el criterio declarado de antemano, llegan en la Fase 7.
 
 ## Estado por fase
