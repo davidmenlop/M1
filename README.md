@@ -22,6 +22,7 @@ trade-offs y el código explicado.
 - [Capítulo 3 — CLI y mock](docs/03-fase-2-cli-y-mock.md)
 - [Capítulo 4 — Multi-proveedor](docs/04-fase-3-multi-proveedor.md)
 - [Capítulo 5 — Prompts versionados](docs/05-fase-4-prompts.md)
+- [Capítulo 6 — Dataset](docs/06-fase-5-dataset.md)
 - [Apéndice A — Decisiones (ADR)](docs/apendice-a-decisiones.md)
 - [Apéndice B — Glosario](docs/apendice-b-glosario.md)
 
@@ -57,6 +58,8 @@ python tests/test_pipeline.py      # 15/15 tests pasaron
 python tests/test_anthropic_provider.py   # 15/15 tests pasaron (cliente falso, sin red)
 python tests/test_openai_provider.py      # 13/13 tests pasaron (cliente falso, sin red)
 python tests/test_prompts.py              # 16/16 tests pasaron
+python tests/test_dataset.py              # 21/21 tests pasaron
+python evals/validate_dataset.py          # estructura, balance y leakage del dataset
 python -m src.main --query "Me cobraron dos veces la suscripción"   # JSON validado (proveedor mock)
 ```
 
@@ -90,7 +93,7 @@ Los modelos, sus parámetros y sus precios están en `config/providers.yaml`.
 | 2 | CLI + `MockProvider` + pipeline + métricas | ✅ |
 | 3 | Multi-proveedor y retry | ✅ |
 | 4 | Prompts versionados | ✅ |
-| 5 | Dataset de evaluación | ⏳ |
+| 5 | Dataset de evaluación | 🟡 40 casos en borrador, pendientes de validación humana |
 | 6 | Suite de evals | ⏳ |
 | 7 | Comparativa empírica | ⏳ |
 | 8 | Guardrails | ⏳ |

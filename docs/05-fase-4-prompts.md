@@ -163,4 +163,4 @@ La **resistencia a inyecciones no entra en este criterio**: la defensa principal
 
 ---
 
-**Anterior:** [Capítulo 4 — Multi-proveedor](04-fase-3-multi-proveedor.md) · **Siguiente:** Capítulo 6 — Dataset (Fase 5, pendiente)
+**Anterior:** [Capítulo 4 — Multi-proveedor](04-fase-3-multi-proveedor.md) · **Siguiente:** [Capítulo 6 — Dataset](06-fase-5-dataset.md)

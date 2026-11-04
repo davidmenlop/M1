@@ -194,6 +194,33 @@
 - **Alternativas:** accuracy como métrica principal (engañosa con clases desbalanceadas); un puntaje ponderado único (los pesos serían arbitrarios y se podrían ajustar a posteriori).
 - **Consecuencias:** el resultado de la Fase 7 queda determinado por los datos, incluso si gana el prompt más simple. El umbral de 0.03 refleja que con 32 casos un acierto mueve unos 3 puntos: diferencias menores son ruido.
 
+## ADR-023 — Acciones esperadas como intents con keywords
+
+- **Fecha:** 2026-11-04
+- **Estado:** aceptada
+- **Contexto:** las acciones del modelo son texto libre ("Verificar los cobros del cliente"), así que compararlas por igualdad exacta daría casi siempre 0. La guía inicial hablaba de `expected_actions_any` sin definir cómo se comparaba.
+- **Decisión:** cada caso lista *intents* (lo que un buen agente haría), cada uno con keywords normalizadas (minúsculas, sin tildes). Un intent se cumple si alguna acción del modelo contiene alguna de sus keywords. El *action score* de un caso es intents cumplidos / intents esperados.
+- **Alternativas:** LLM-as-judge (captura sinónimos, pero cuesta, varía entre corridas y hay que validarlo a su vez); embeddings (agrega una dependencia y un umbral arbitrario); igualdad exacta (inútil con texto libre).
+- **Consecuencias:** el puntaje es gratis, determinista y auditable. Puede dar falsos negativos si el modelo usa un sinónimo que no está en la lista: los fallos se revisan en la Fase 7 y, si hace falta, se amplían las keywords (lo que cambia el dataset, no los prompts). El action score es un desempate (ADR-022), no la métrica principal.
+
+## ADR-024 — Borrador del asistente, etiqueta de una persona
+
+- **Fecha:** 2026-11-04
+- **Estado:** aceptada
+- **Contexto:** si el mismo asistente que escribe los prompts también fija las etiquetas, la eval mide cuánto coincide el modelo con el asistente, no con el negocio.
+- **Decisión:** el asistente propone el borrador (`proposed_category`, `rationale`); una persona confirma o corrige cada caso con `review_labels.py`. Solo los casos `validated` entran a las evals. Se reporta la tasa de acuerdo entre el borrador y la revisión.
+- **Alternativas:** etiquetado 100 % humano desde cero (más lento); usar el borrador sin revisión (sesgo circular).
+- **Consecuencias:** riesgo de **anclaje**: la persona tiende a aceptar lo que ve. Para mitigarlo, cada caso muestra el motivo y la regla aplicada, para que se pueda discutir, y existe el estado `disputed`. Una tasa de acuerdo del 100 % no prueba que el borrador sea perfecto: puede ser anclaje.
+
+## ADR-025 — Dataset sintético, escrito a mano
+
+- **Fecha:** 2026-11-04
+- **Estado:** aceptada
+- **Contexto:** no hay tickets reales de Nubbix disponibles, y el repositorio es público.
+- **Decisión:** casos escritos a mano a partir de situaciones típicas de un SaaS de gestión para pymes de LATAM, incluidos los casos borde que pide la guía.
+- **Alternativas:** tickets reales anonimizados (más realistas, pero no existen y anonimizar bien es difícil); generarlos con un LLM (tienden a ser homogéneos y "de libro").
+- **Consecuencias:** sin datos personales en el repo. El dataset es más limpio que el soporte real: las métricas son una cota optimista, y así se reporta.
+
 ## ADR-011 — Rama `master`
 
 - **Fecha:** 2026-10-22
