@@ -1,4 +1,11 @@
-"""Proveedor Anthropic (Messages API) sobre el SDK oficial."""
+"""Proveedor Anthropic (Messages API) sobre el SDK oficial.
+
+Sobre la temperatura: el SDK envía ``anthropic-version: 2026-10-21``
+(``anthropic._constants.ANTHROPIC_API_VERSION``). Desde esa versión la API rechaza
+``temperature``, ``top_p`` y ``top_k`` con 400 en *todos* los modelos, no solo en
+Haiku 4.5. Por eso este proveedor nunca envía muestreo. La variabilidad se controla
+con el prompt y, en los modelos que piensan, con ``effort`` (ADR-016).
+"""
 
 from __future__ import annotations
 
@@ -57,7 +64,13 @@ class AnthropicProvider(LLMProvider):
         temperature: float | None,
         max_tokens: int,
         timeout_s: float,
+        effort: str | None = None,
     ) -> LLMResponse:
+        if temperature is not None:
+            raise ProviderFatalError(
+                "la API de Anthropic (versión 2026-10-21) rechaza 'temperature' en todos "
+                "los modelos; poné 'temperature: null' en config/providers.yaml"
+            )
         params: dict[str, Any] = {
             "model": model,
             "system": system,
@@ -65,8 +78,8 @@ class AnthropicProvider(LLMProvider):
             "max_tokens": max_tokens,
             "timeout": timeout_s,
         }
-        if temperature is not None:
-            params["extra_body"] = {"temperature": temperature}
+        if effort is not None:
+            params["output_config"] = {"effort": effort}
         try:
             message = self._client.messages.create(**params)
         except FATAL as exc:

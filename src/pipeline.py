@@ -142,6 +142,7 @@ class TriagePipeline:
                     temperature=self._model.temperature,
                     max_tokens=self._model.max_tokens,
                     timeout_s=self._timeout_s,
+                    effort=self._model.effort,
                 )
             except ProviderError as exc:
                 last_error = f"error del proveedor: {exc}"[:MAX_FEEDBACK_CHARS]

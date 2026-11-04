@@ -7,7 +7,7 @@ import json
 import logging
 import sys
 
-from src.config import ConfigError, load_model_config, load_settings
+from src.config import DEFAULT_MODEL_KEY, ConfigError, load_model_config, load_settings
 from src.observability.metrics import append_metric, build_record
 from src.pipeline import TriagePipeline
 from src.prompts import PromptError, load_prompt
@@ -24,6 +24,11 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
     )
     parser.add_argument("--query", required=True, help="consulta del cliente; '-' lee desde stdin")
     parser.add_argument("--provider", help="mock | openai | anthropic (por defecto: DEFAULT_PROVIDER)")
+    parser.add_argument(
+        "--model",
+        default=DEFAULT_MODEL_KEY,
+        help="clave del modelo en config/providers.yaml (por defecto: default)",
+    )
     parser.add_argument("--prompt", help="versión del prompt, por ejemplo v1 (por defecto: DEFAULT_PROMPT_VERSION)")
     parser.add_argument("--pretty", action="store_true", help="imprime el JSON indentado")
     return parser.parse_args(argv)
@@ -57,7 +62,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         provider = build_provider(provider_name)
-        model = load_model_config(provider_name)
+        model = load_model_config(provider_name, args.model)
         prompt = load_prompt(prompt_version)
     except (ProviderUnavailable, ConfigError, PromptError) as exc:
         return _fail(str(exc))

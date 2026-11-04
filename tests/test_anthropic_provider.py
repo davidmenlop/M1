@@ -81,7 +81,7 @@ def _pipeline(client: FakeClient, max_retries: int = 2) -> TriagePipeline:
 def test_success_maps_text_and_usage() -> None:
     client = FakeClient([_message(VALID_JSON, 120, 40)])
     response = AnthropicProvider(client=client).complete(
-        "sys", "usr", model="claude-haiku-4-5", temperature=0.0, max_tokens=700, timeout_s=30
+        "sys", "usr", model="claude-haiku-4-5", temperature=None, max_tokens=700, timeout_s=30
     )
     assert response.text == VALID_JSON
     assert response.prompt_tokens == 120
@@ -102,27 +102,54 @@ def test_request_carries_model_and_timeout() -> None:
     assert call["timeout"] == 12
 
 
-def test_temperature_omitted_when_model_does_not_accept_it() -> None:
+def test_sampling_params_never_sent() -> None:
     client = FakeClient([_message(VALID_JSON)])
     AnthropicProvider(client=client).complete(
         "sys", "usr", model="claude-haiku-4-5", temperature=None, max_tokens=700, timeout_s=12
     )
-    assert "extra_body" not in client.messages.calls[0]
+    call = client.messages.calls[0]
+    assert "temperature" not in call
+    assert "extra_body" not in call
+    assert "output_config" not in call
 
 
-def test_temperature_sent_when_configured() -> None:
+def test_configured_temperature_fails_before_calling_api() -> None:
+    client = FakeClient([_message(VALID_JSON)])
+    try:
+        AnthropicProvider(client=client).complete(
+            "sys", "usr", model="claude-haiku-4-5", temperature=0.0, max_tokens=700, timeout_s=12
+        )
+    except ProviderFatalError as exc:
+        assert "temperature" in str(exc)
+        assert client.messages.calls == [], "no debió llamar a la API"
+        return
+    raise AssertionError("temperature configurada debió ser ProviderFatalError")
+
+
+def test_effort_sent_as_output_config() -> None:
     client = FakeClient([_message(VALID_JSON)])
     AnthropicProvider(client=client).complete(
-        "sys", "usr", model="modelo-que-acepta", temperature=0.0, max_tokens=700, timeout_s=12
+        "sys", "usr", model="claude-haiku-5-5", temperature=None, max_tokens=2000,
+        timeout_s=12, effort="low",
     )
-    assert client.messages.calls[0]["extra_body"] == {"temperature": 0.0}
+    assert client.messages.calls[0]["output_config"] == {"effort": "low"}
+
+
+def test_thinking_blocks_are_ignored_in_text() -> None:
+    message = _message(VALID_JSON)
+    message.content.insert(0, SimpleNamespace(type="thinking", thinking=""))
+    client = FakeClient([message])
+    response = AnthropicProvider(client=client).complete(
+        "s", "u", model="claude-haiku-5-5", temperature=None, max_tokens=2000, timeout_s=5
+    )
+    assert response.text == VALID_JSON
 
 
 def test_rate_limit_is_retryable() -> None:
     client = FakeClient([_api_error(anthropic.RateLimitError, 429)])
     try:
         AnthropicProvider(client=client).complete(
-            "s", "u", model="m", temperature=0.0, max_tokens=10, timeout_s=5
+            "s", "u", model="m", temperature=None, max_tokens=10, timeout_s=5
         )
     except ProviderError:
         return
@@ -133,7 +160,7 @@ def test_server_error_is_retryable() -> None:
     client = FakeClient([_api_error(anthropic.InternalServerError, 500)])
     try:
         AnthropicProvider(client=client).complete(
-            "s", "u", model="m", temperature=0.0, max_tokens=10, timeout_s=5
+            "s", "u", model="m", temperature=None, max_tokens=10, timeout_s=5
         )
     except ProviderError:
         return
@@ -144,7 +171,7 @@ def test_auth_error_is_fatal() -> None:
     client = FakeClient([_api_error(anthropic.AuthenticationError, 401)])
     try:
         AnthropicProvider(client=client).complete(
-            "s", "u", model="m", temperature=0.0, max_tokens=10, timeout_s=5
+            "s", "u", model="m", temperature=None, max_tokens=10, timeout_s=5
         )
     except ProviderFatalError:
         return

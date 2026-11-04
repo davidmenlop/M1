@@ -36,8 +36,15 @@ class LLMProvider(ABC):
         user: str,
         *,
         model: str,
-        temperature: float,
+        temperature: float | None,
         max_tokens: int,
         timeout_s: float,
+        effort: str | None = None,
     ) -> LLMResponse:
+        """Una llamada al modelo.
+
+        ``temperature`` y ``effort`` son opcionales: ``None`` significa "no enviar el
+        parámetro". Cada proveedor decide qué acepta y falla explícitamente si recibe
+        un valor que su API rechaza.
+        """
         raise NotImplementedError

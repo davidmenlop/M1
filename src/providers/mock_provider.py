@@ -88,9 +88,10 @@ class MockProvider(LLMProvider):
         user: str,
         *,
         model: str,
-        temperature: float,
+        temperature: float | None,
         max_tokens: int,
         timeout_s: float,
+        effort: str | None = None,
     ) -> LLMResponse:
         if self._malformed_remaining > 0:
             self._malformed_remaining -= 1

@@ -26,6 +26,11 @@ class ModelConfig:
     max_tokens: int
     input_per_1m_usd: float
     output_per_1m_usd: float
+    effort: str | None = None
+
+
+DEFAULT_MODEL_KEY = "default"
+EFFORT_LEVELS = {"low", "medium", "high", "xhigh", "max"}
 
 
 @dataclass(frozen=True)
@@ -82,19 +87,41 @@ def load_settings() -> Settings:
     )
 
 
-def load_model_config(provider: str) -> ModelConfig:
+def available_models(provider: str) -> list[str]:
     providers = _read_providers_file()["providers"]
     try:
-        raw = providers[provider]["models"]["default"]
-        pricing = raw["pricing"]
+        return sorted(providers[provider]["models"])
+    except (KeyError, TypeError):
+        return []
+
+
+def load_model_config(provider: str, model_key: str = DEFAULT_MODEL_KEY) -> ModelConfig:
+    providers = _read_providers_file()["providers"]
+    try:
+        models = providers[provider]["models"]
     except (KeyError, TypeError) as exc:
+        raise ConfigError(f"providers.yaml no define modelos para '{provider}'") from exc
+    if model_key not in models:
+        options = ", ".join(sorted(models))
+        raise ConfigError(f"'{provider}' no tiene el modelo '{model_key}'. Opciones: {options}")
+    raw = models[model_key]
+    try:
+        pricing = raw["pricing"]
+        temperature = raw.get("temperature")
+        effort = raw.get("effort")
+        config = ModelConfig(
+            id=str(raw["id"]),
+            temperature=None if temperature is None else float(temperature),
+            max_tokens=int(raw["max_tokens"]),
+            input_per_1m_usd=float(pricing["input_per_1m_usd"]),
+            output_per_1m_usd=float(pricing["output_per_1m_usd"]),
+            effort=None if effort is None else str(effort),
+        )
+    except (KeyError, TypeError, ValueError) as exc:
         raise ConfigError(
-            f"providers.yaml no define el modelo 'default' con pricing para '{provider}'"
+            f"providers.yaml: el modelo '{model_key}' de '{provider}' necesita id, "
+            "max_tokens y pricing válidos"
         ) from exc
-    return ModelConfig(
-        id=str(raw["id"]),
-        temperature=None if raw["temperature"] is None else float(raw["temperature"]),
-        max_tokens=int(raw["max_tokens"]),
-        input_per_1m_usd=float(pricing["input_per_1m_usd"]),
-        output_per_1m_usd=float(pricing["output_per_1m_usd"]),
-    )
+    if config.effort is not None and config.effort not in EFFORT_LEVELS:
+        raise ConfigError(f"effort inválido '{config.effort}'. Opciones: {sorted(EFFORT_LEVELS)}")
+    return config

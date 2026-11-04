@@ -12,7 +12,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from src.config import ModelConfig  # noqa: E402
+from src.config import ConfigError, ModelConfig, available_models, load_model_config  # noqa: E402
 from src.observability.metrics import append_metric, build_record  # noqa: E402
 from src.observability.pricing import compute_cost  # noqa: E402
 from src.pipeline import ParseError, TriagePipeline, extract_json  # noqa: E402
@@ -138,13 +138,35 @@ def test_prompt_render_injects_contract_and_query() -> None:
     assert '"category"' in system
 
 
-def test_unknown_or_planned_provider_is_unavailable() -> None:
-    for name in ("desconocido", "openai"):
-        try:
-            build_provider(name)
-        except ProviderUnavailable:
-            continue
-        raise AssertionError(f"el proveedor '{name}' debió no estar disponible")
+def test_unknown_provider_is_unavailable() -> None:
+    try:
+        build_provider("desconocido")
+    except ProviderUnavailable as exc:
+        assert "openai" in str(exc) and "anthropic" in str(exc)
+        return
+    raise AssertionError("un proveedor desconocido debió no estar disponible")
+
+
+def test_model_key_selects_alternative_model() -> None:
+    config = load_model_config("anthropic", "haiku-5-5")
+    assert config.id == "claude-haiku-5-5"
+    assert config.temperature is None
+    assert config.effort == "low"
+    assert "haiku-5-5" in available_models("anthropic")
+
+
+def test_default_model_has_no_effort() -> None:
+    assert load_model_config("anthropic").effort is None
+    assert load_model_config("openai").temperature == 0.0
+
+
+def test_unknown_model_key_is_config_error() -> None:
+    try:
+        load_model_config("anthropic", "no-existe")
+    except ConfigError as exc:
+        assert "default" in str(exc) and "haiku-5-5" in str(exc)
+        return
+    raise AssertionError("una clave de modelo inexistente debió ser ConfigError")
 
 
 def main() -> int:

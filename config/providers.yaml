@@ -1,13 +1,20 @@
 # Precios en USD por 1M de tokens. VERIFICAR contra las páginas oficiales
 # antes de la entrega y actualizar la fecha.
-# Actualizado: 2026-10-22
-default_provider: mock       # cambiar a openai en la Fase 3
+# Actualizado: 2026-11-04 (Anthropic verificado contra la tabla oficial de precios)
+#
+# Cada proveedor puede tener varios modelos; se eligen con --model <clave>.
+# temperature: null  -> no se envía. Anthropic la rechaza en todos los modelos
+#                       desde la versión de API 2026-10-21 (ADR-016).
+# effort:             -> solo modelos que piensan (Haiku 5.5). low|medium|high|xhigh|max.
+#
+# El proveedor por defecto es mock para que un clon limpio corra sin claves (ADR-012).
+default_provider: mock
 
 providers:
   openai:
     models:
       default:
-        id: gpt-4.1-mini          # confirmar ID vigente
+        id: gpt-4.1-mini          # sin razonamiento: acepta temperature. Precio a verificar
         temperature: 0.0
         max_tokens: 700
         pricing:
@@ -17,12 +24,20 @@ providers:
   anthropic:
     models:
       default:
-        id: claude-haiku-4-5      # ID presente en el SDK 2.1.0; precio de referencia $1/$5 por 1M: verificar
-        temperature: null         # la API rechaza el campo para este modelo (400): no se envía
+        id: claude-haiku-4-5      # generación anterior; sin thinking por defecto
+        temperature: null         # rechazada por la API 2026-10-21 en todos los modelos
         max_tokens: 700
         pricing:
           input_per_1m_usd: 1.00
           output_per_1m_usd: 5.00
+      haiku-5-5:
+        id: claude-haiku-5-5      # Haiku actual. Piensa por defecto (effort medium)
+        temperature: null
+        effort: low               # clasificación simple: menos tokens de thinking
+        max_tokens: 2000          # el thinking consume max_tokens: margen sobre los 700
+        pricing:                  # tarifa para prompts <= 100K tokens
+          input_per_1m_usd: 0.10
+          output_per_1m_usd: 0.50
 
   mock:
     models:
