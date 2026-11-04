@@ -131,7 +131,7 @@ def test_metrics_append_jsonl() -> None:
 
 def test_prompt_render_injects_contract_and_query() -> None:
     prompt = load_prompt("v1")
-    system, user = prompt.render("hola", TriageResponse.json_contract())
+    system, user = prompt.render("hola")
     assert "{contract}" not in system
     assert "{query}" not in user
     assert "<consulta>" in user and "hola" in user

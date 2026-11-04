@@ -126,7 +126,7 @@ class TriagePipeline:
     def run(self, query: str) -> TriageResult:
         request_id = uuid.uuid4().hex
         started = time.perf_counter()
-        system, base_user = self._prompt.render(query, TriageResponse.json_contract())
+        system, base_user = self._prompt.render(query)
         usage = _Usage()
         attempts = 0
         last_error: str | None = None
@@ -151,7 +151,8 @@ class TriagePipeline:
 
             usage.add(response)
             try:
-                validated = TriageResponse.model_validate(extract_json(response.text))
+                data = self._prompt.strip_internal(extract_json(response.text))
+                validated = TriageResponse.model_validate(data)
             except (ParseError, ValidationError) as exc:
                 last_error = _describe(exc)
                 logger.warning("intento %d inválido: %s", attempts, last_error)
