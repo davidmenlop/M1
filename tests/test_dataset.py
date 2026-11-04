@@ -176,7 +176,8 @@ def test_skip_and_quit() -> None:
 
 
 def test_reviewed_dataset_stays_valid_and_reports_agreement() -> None:
-    cases = copy.deepcopy(CASES)
+    # Parte de un dataset sin cambios de revisión, sea cual sea el estado real del archivo.
+    cases = [{**c, "expected_category": c["proposed_category"]} for c in copy.deepcopy(CASES)]
     cases = [apply_decision(c, "", "Ana") for c in cases]
     billing = next(i for i, c in enumerate(cases) if c["proposed_category"] == "billing")
     cases[billing] = apply_decision(cases[billing], "o", "Ana")
