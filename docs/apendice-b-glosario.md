@@ -22,6 +22,8 @@
 
 **Chain-of-thought (CoT).** Pedir al modelo que razone paso a paso antes de responder. Mejora tareas complejas; agrega tokens y latencia, y puede filtrar el razonamiento si no se aísla.
 
+**Campo interno.** Campo que el prompt pide al modelo además del contrato (acá, `reasoning` en v3). El pipeline lo descarta antes de validar, así que nunca llega al cliente.
+
 **Structured output.** Forzar que la salida respete un esquema (JSON Schema). Reduce el parseo frágil.
 
 **Temperatura.** Parámetro de aleatoriedad. `0.0` ≈ determinista; valores altos aumentan variedad y riesgo. OpenAI la acepta; la API de Anthropic (versión `2026-10-21`) la rechaza en todos los modelos.
@@ -47,6 +49,8 @@
 ## Evaluación
 
 **Dataset de evaluación.** Conjunto de casos con etiqueta esperada. Acá: ≥30 casos (objetivo: 40), balanceados por categoría, más casos borde.
+
+**Leakage (fuga de datos).** Que un caso de evaluación aparezca, igual o casi igual, en el prompt (por ejemplo, como ejemplo few-shot). Infla las métricas sin que el sistema sea mejor.
 
 **Ground truth.** La etiqueta correcta de un caso, definida por un humano con una guía de etiquetado.
 

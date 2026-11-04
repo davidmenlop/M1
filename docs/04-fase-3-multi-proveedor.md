@@ -239,4 +239,4 @@ Con una consulta no se concluye nada sobre calidad. Sí muestra algo para la Fas
 
 ---
 
-**Anterior:** [Capítulo 3 — CLI y mock](03-fase-2-cli-y-mock.md) · **Siguiente:** Capítulo 5 — Prompts versionados (Fase 4, pendiente)
+**Anterior:** [Capítulo 3 — CLI y mock](03-fase-2-cli-y-mock.md) · **Siguiente:** [Capítulo 5 — Prompts versionados](05-fase-4-prompts.md)

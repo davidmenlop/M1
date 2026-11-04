@@ -3,9 +3,9 @@
 Servicio que recibe una consulta de soporte en texto libre y devuelve un JSON validado
 con `{answer, confidence, category, actions}`, con métricas de tokens, latencia y costo.
 
-> **Estado:** en construcción. Fases 0–3 completas: contrato, CLI, pipeline con
-> reintento y fallback, métricas, y proveedores OpenAI y Anthropic. Faltan prompts
-> v2/v3, dataset, suite de evals y guardrails.
+> **Estado:** en construcción. Fases 0–4 completas: contrato, CLI, pipeline con
+> reintento y fallback, métricas, proveedores OpenAI y Anthropic, y prompts v1/v2/v3.
+> Faltan dataset, suite de evals, comparativa y guardrails.
 >
 > Este README se completa en el Capítulo 12 del manual. Por ahora, el documento
 > principal del proyecto es el libro de construcción.
@@ -21,6 +21,7 @@ trade-offs y el código explicado.
 - [Capítulo 2 — El contrato](docs/02-fase-1-contrato.md)
 - [Capítulo 3 — CLI y mock](docs/03-fase-2-cli-y-mock.md)
 - [Capítulo 4 — Multi-proveedor](docs/04-fase-3-multi-proveedor.md)
+- [Capítulo 5 — Prompts versionados](docs/05-fase-4-prompts.md)
 - [Apéndice A — Decisiones (ADR)](docs/apendice-a-decisiones.md)
 - [Apéndice B — Glosario](docs/apendice-b-glosario.md)
 
@@ -55,6 +56,7 @@ python tests/test_schemas.py       # 10/10 tests pasaron
 python tests/test_pipeline.py      # 15/15 tests pasaron
 python tests/test_anthropic_provider.py   # 15/15 tests pasaron (cliente falso, sin red)
 python tests/test_openai_provider.py      # 13/13 tests pasaron (cliente falso, sin red)
+python tests/test_prompts.py              # 16/16 tests pasaron
 python -m src.main --query "Me cobraron dos veces la suscripción"   # JSON validado (proveedor mock)
 ```
 
@@ -68,6 +70,9 @@ python -m src.main --query "Me cobraron dos veces la suscripción" --pretty
 python -m src.main --query "..." --provider openai
 python -m src.main --query "..." --provider anthropic                    # claude-haiku-4-5
 python -m src.main --query "..." --provider anthropic --model haiku-5-5  # claude-haiku-5-5
+
+# Versión del prompt: v1 (zero-shot, default), v2 (few-shot), v3 (few-shot + CoT + seguridad)
+python -m src.main --query "..." --provider openai --prompt v2
 
 # La consulta también puede llegar por stdin
 echo "No puedo iniciar sesión" | python -m src.main --query -
@@ -84,7 +89,7 @@ Los modelos, sus parámetros y sus precios están en `config/providers.yaml`.
 | 1 | Contrato Pydantic + tests | ✅ |
 | 2 | CLI + `MockProvider` + pipeline + métricas | ✅ |
 | 3 | Multi-proveedor y retry | ✅ |
-| 4 | Prompts versionados | ⏳ |
+| 4 | Prompts versionados | ✅ |
 | 5 | Dataset de evaluación | ⏳ |
 | 6 | Suite de evals | ⏳ |
 | 7 | Comparativa empírica | ⏳ |

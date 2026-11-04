@@ -167,6 +167,33 @@
 - **Alternativas:** reemplazar 4.5 por 5.5 directamente (se pierde la comparación); desactivar el thinking (posible en Haiku 5.5 con effort ≤ high, pero `low` deja que el modelo decida y suele ser suficiente).
 - **Consecuencias:** la comparativa de la Fase 7 puede incluir 3 modelos reales sin tocar código. `effort` es un campo nuevo del contrato `LLMProvider.complete`: Anthropic lo envía como `output_config.effort` y OpenAI como `reasoning_effort`.
 
+## ADR-020 — Prompts inmutables con ejemplos validados al cargar
+
+- **Fecha:** 2026-11-04
+- **Estado:** aceptada
+- **Contexto:** la comparativa de la Fase 7 guarda resultados por versión de prompt. Si un YAML se edita después de evaluarlo, el resultado ya no corresponde al prompt. Además, un ejemplo few-shot que viola el contrato le enseña al modelo a violarlo.
+- **Decisión:** una versión evaluada no se edita; cualquier cambio es una versión nueva. `load_prompt` valida cada ejemplo contra `TriageResponse` y falla al cargar si alguno no cumple.
+- **Alternativas:** editar en el lugar y confiar en git para saber qué se evaluó (frágil: los resultados no guardan el hash del prompt); no validar los ejemplos (el error aparece como peor accuracy, sin causa visible).
+- **Consecuencias:** pueden acumularse versiones; es el precio de que cada número sea trazable. Un ejemplo mal escrito se detecta antes de gastar una sola request.
+
+## ADR-021 — El razonamiento de CoT va en un campo interno que se descarta
+
+- **Fecha:** 2026-11-04
+- **Estado:** aceptada
+- **Contexto:** chain-of-thought requiere que el modelo escriba su razonamiento, pero el contrato es `extra="forbid"` y el cliente no debe verlo. La Fase 1 ya lo anticipaba.
+- **Decisión:** el prompt declara `internal_fields` (`reasoning`), que se agregan **primero** al JSON Schema inyectado. El pipeline los quita antes de validar. No se guardan en `metrics.jsonl`.
+- **Alternativas:** razonamiento en texto libre antes del JSON (rompe JSON mode de OpenAI y obliga a un parseo más laxo); relajar `extra="forbid"` (abre el contrato a cualquier campo); thinking nativo del modelo (no existe en `gpt-4.1-mini` y haría la técnica desigual entre proveedores).
+- **Consecuencias:** la técnica es idéntica en todos los proveedores y el contrato público no cambia. El razonamiento cuesta tokens de salida y no queda registrado para depurar; si hace falta, se agrega a los resultados de evals (que no contienen datos de clientes), no a las métricas.
+
+## ADR-022 — Criterio de selección de prompt declarado antes de medir
+
+- **Fecha:** 2026-11-04
+- **Estado:** aceptada
+- **Contexto:** la rúbrica exige elegir el prompt con datos y con un criterio fijado de antemano. Elegir después de ver los números invita a justificar el resultado preferido.
+- **Decisión:** requisitos mínimos (schema 100 %, `retry_rate` ≤ 10 %) → macro-F1 en dev → si la diferencia es < 0.03, action score → si sigue < 0.03, costo por request y latencia p95. Confirmación única en holdout (caída > 0.10 = sobreajuste reportado). Anthropic: promedio de 3 corridas. La resistencia a inyecciones se reporta aparte (Fase 9). Detalle en el Capítulo 5, §7.
+- **Alternativas:** accuracy como métrica principal (engañosa con clases desbalanceadas); un puntaje ponderado único (los pesos serían arbitrarios y se podrían ajustar a posteriori).
+- **Consecuencias:** el resultado de la Fase 7 queda determinado por los datos, incluso si gana el prompt más simple. El umbral de 0.03 refleja que con 32 casos un acierto mueve unos 3 puntos: diferencias menores son ruido.
+
 ## ADR-011 — Rama `master`
 
 - **Fecha:** 2026-10-22
