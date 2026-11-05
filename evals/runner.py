@@ -28,6 +28,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from evals.dataset import CATEGORIES, DATASET_PATH, DatasetError, load_dataset, validate  # noqa: E402
 from evals.metrics import aggregate, check_thresholds, compute  # noqa: E402
 from src.config import REPO_ROOT, ConfigError, load_model_config, load_settings  # noqa: E402
+from src.guardrails import GuardrailConfigError, Guardrails  # noqa: E402
 from src.pipeline import TriagePipeline  # noqa: E402
 from src.prompts import PROMPTS_DIR, PromptError, load_prompt  # noqa: E402
 from src.providers.base import ProviderFatalError, ProviderUnavailable  # noqa: E402
@@ -92,6 +93,7 @@ def run_case(pipeline: TriagePipeline, case: dict[str, Any]) -> dict[str, Any]:
         "cost_usd": result.cost_usd,
         "latency_s": round(result.latency_s, 4),
         "error": result.error,
+        "guard": result.guard.to_dict() if result.guard else None,
     }
 
 
@@ -135,6 +137,15 @@ def print_report(meta: dict[str, Any], summary: dict[str, Any], last: dict[str, 
         ("costo total (USD)", _fmt(summary["total_cost_usd"], "usd")),
         ("latencia p50 / p95 (s)", f"{_fmt(summary['latency_p50_s'], 'num')} / {_fmt(summary['latency_p95_s'], 'num')}"),
     ]
+    if summary.get("guard_overhead_p95_ms") is not None:
+        rows += [
+            ("guardrail: entradas bloqueadas", _fmt(summary["guard_blocked_rate"])),
+            ("guardrail: entradas saneadas", _fmt(summary["guard_input_sanitized_rate"])),
+            ("guardrail: salidas modificadas", _fmt(summary["guard_output_modified_rate"])),
+            ("guardrail: overhead p95 (ms)", _fmt(summary["guard_overhead_p95_ms"], "num")),
+        ]
+    else:
+        rows.append(("guardrails", "desactivados"))
     width = max(len(r[0]) for r in rows)
     for label, text in rows:
         print(f"  {label:<{width}}  {text}")
@@ -191,6 +202,7 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser.add_argument("--repeat", type=int, default=1, help="corridas repetidas para medir varianza")
     parser.add_argument("--ids", nargs="+", help="correr solo estos casos (depuración)")
     parser.add_argument("--no-save", action="store_true", help="no guardar el JSON de resultados")
+    parser.add_argument("--no-guardrails", action="store_true", help="corre sin guardrails (para medir su efecto)")
     parser.add_argument("--yes", action="store_true", help=f"no pedir confirmación sobre USD {CONFIRM_ABOVE_USD}")
     parser.add_argument("--compare", nargs="+", type=Path, metavar="RESULTADO", help="tabla comparativa de resultados guardados")
     return parser.parse_args(argv)
@@ -222,7 +234,8 @@ def main(argv: list[str] | None = None) -> int:
         provider = build_provider(provider_name)
         model = load_model_config(provider_name, args.model)
         prompt = load_prompt(prompt_version)
-    except (DatasetError, ProviderUnavailable, ConfigError, PromptError) as exc:
+        guardrails = None if args.no_guardrails else Guardrails.from_config()
+    except (DatasetError, ProviderUnavailable, ConfigError, PromptError, GuardrailConfigError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
     if skipped:
@@ -241,7 +254,8 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     pipeline = TriagePipeline(provider=provider, model=model, prompt=prompt,
-                              max_retries=settings.max_retries, timeout_s=settings.request_timeout_s)
+                              max_retries=settings.max_retries, timeout_s=settings.request_timeout_s,
+                              guardrails=guardrails)
     runs, run_cases = [], []
     try:
         for number in range(1, args.repeat + 1):
@@ -278,6 +292,8 @@ def main(argv: list[str] | None = None) -> int:
         "repeat": args.repeat,
         "max_retries": settings.max_retries,
         "git": _git(),
+        "guardrails": {"enabled": guardrails is not None,
+                       "sha256": guardrails.sha256 if guardrails else None},
     }
     print_report(meta, summary, runs[-1], checks)
 
@@ -285,7 +301,8 @@ def main(argv: list[str] | None = None) -> int:
         RESULTS_DIR.mkdir(parents=True, exist_ok=True)
         stamp = datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
         suffix = f"_x{args.repeat}" if args.repeat > 1 else ""
-        path = RESULTS_DIR / f"{stamp}_{provider_name}-{args.model}_{prompt_version}_{args.split}{suffix}.json"
+        guard_tag = "_noguard" if guardrails is None else ""
+        path = RESULTS_DIR / f"{stamp}_{provider_name}-{args.model}_{prompt_version}_{args.split}{suffix}{guard_tag}.json"
         payload = {"meta": meta, "summary": summary, "thresholds": checks,
                    "runs": [{"metrics": m, "cases": c} for m, c in zip(runs, run_cases)]}
         path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

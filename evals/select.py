@@ -6,7 +6,8 @@ Uso:
 Solo cuentan como evidencia las corridas del split dev que:
 - se hicieron con el árbol limpio (ADR-026);
 - usan el dataset y el prompt actuales (mismo sha256);
-- en Anthropic, promedian al menos 3 corridas (ADR-022).
+- en Anthropic, promedian al menos 3 corridas (ADR-022);
+- tienen los guardrails en el estado pedido (--guardrails; por defecto off, como la Fase 7).
 El mock es la línea base: se muestra en la comparativa, pero no compite.
 Si hay varias corridas de la misma combinación, se usa la más reciente.
 """
@@ -61,7 +62,7 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def load_candidates(paths: list[Path], split: str = "dev") -> tuple[list[Candidate], list[str]]:
+def load_candidates(paths: list[Path], split: str = "dev", guardrails: str = "off") -> tuple[list[Candidate], list[str]]:
     """Lee los resultados válidos como evidencia; devuelve también por qué se excluyó cada uno."""
     dataset_sha = _sha256(DATASET_PATH)
     latest: dict[tuple[str, str, str], tuple[str, Candidate]] = {}
@@ -81,6 +82,8 @@ def load_candidates(paths: list[Path], split: str = "dev") -> tuple[list[Candida
             reason = "dataset distinto del actual"
         elif not prompt_file.exists() or meta["prompt_sha256"] != _sha256(prompt_file):
             reason = "prompt distinto del actual"
+        elif ("on" if meta.get("guardrails", {}).get("enabled") else "off") != guardrails:
+            reason = f"guardrails distintos de '{guardrails}'"
         elif summary["runs"] < MIN_REPEATS.get(meta["provider"], 1):
             reason = f"{summary['runs']} corrida(s); se exigen {MIN_REPEATS[meta['provider']]}"
         if reason:
@@ -165,8 +168,10 @@ def print_selection(result: dict[str, Any], excluded: list[str]) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("results", nargs="+", type=Path)
+    parser.add_argument("--guardrails", choices=("off", "on"), default="off",
+                        help="comparar solo corridas con guardrails en este estado (por defecto: off)")
     args = parser.parse_args(argv)
-    candidates, excluded = load_candidates(args.results)
+    candidates, excluded = load_candidates(args.results, guardrails=args.guardrails)
     if not candidates:
         print("no hay resultados válidos como evidencia", file=sys.stderr)
         return 1

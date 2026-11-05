@@ -8,6 +8,7 @@ import logging
 import sys
 
 from src.config import DEFAULT_MODEL_KEY, ConfigError, load_model_config, load_settings
+from src.guardrails import GuardrailConfigError, Guardrails
 from src.observability.metrics import append_metric, build_record
 from src.pipeline import TriagePipeline
 from src.prompts import PromptError, load_prompt
@@ -31,6 +32,8 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
     )
     parser.add_argument("--prompt", help="versión del prompt, por ejemplo v1 (por defecto: DEFAULT_PROMPT_VERSION)")
     parser.add_argument("--pretty", action="store_true", help="imprime el JSON indentado")
+    parser.add_argument("--no-guardrails", action="store_true",
+                        help="desactiva los guardrails de entrada y salida (solo para medir su efecto)")
     return parser.parse_args(argv)
 
 
@@ -64,7 +67,8 @@ def main(argv: list[str] | None = None) -> int:
         provider = build_provider(provider_name)
         model = load_model_config(provider_name, args.model)
         prompt = load_prompt(prompt_version)
-    except (ProviderUnavailable, ConfigError, PromptError) as exc:
+        guardrails = None if args.no_guardrails else Guardrails.from_config()
+    except (ProviderUnavailable, ConfigError, PromptError, GuardrailConfigError) as exc:
         return _fail(str(exc))
 
     pipeline = TriagePipeline(
@@ -73,6 +77,7 @@ def main(argv: list[str] | None = None) -> int:
         prompt=prompt,
         max_retries=settings.max_retries,
         timeout_s=settings.request_timeout_s,
+        guardrails=guardrails,
     )
     try:
         result = pipeline.run(query)

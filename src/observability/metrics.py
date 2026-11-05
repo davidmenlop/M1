@@ -23,7 +23,7 @@ def build_record(result: TriageResult, query: str) -> dict[str, Any]:
         "query_sha256": hashlib.sha256(query.encode("utf-8")).hexdigest(),
         "query_chars": len(query),
         "attempts": result.attempts,
-        "retries": result.attempts - 1,
+        "retries": max(result.attempts - 1, 0),
         "success": result.success,
         "category": str(result.response.category),
         "confidence": result.response.confidence,
@@ -34,6 +34,7 @@ def build_record(result: TriageResult, query: str) -> dict[str, Any]:
         "latency_s": round(result.latency_s, 4),
         "cost_usd": result.cost_usd,
         "error": result.error,
+        "guardrails": result.guard.to_dict() if result.guard else None,
     }
 
 

@@ -90,6 +90,7 @@ def compute(results: list[dict[str, Any]]) -> dict[str, Any]:
         subset = [ok for r, ok in zip(results, correct) if r["difficulty"] == level]
         by_difficulty[level] = {"n": len(subset), "accuracy": sum(subset) / len(subset)}
 
+    guards = [r["guard"] for r in results if r.get("guard")]
     costs = [r["cost_usd"] for r in results]
     latencies = [r["latency_s"] for r in results]
     return {
@@ -114,6 +115,10 @@ def compute(results: list[dict[str, Any]]) -> dict[str, Any]:
         "mean_cost_usd": round(sum(costs) / n, 8),
         "latency_p50_s": round(percentile(latencies, 0.50), 4),
         "latency_p95_s": round(percentile(latencies, 0.95), 4),
+        "guard_blocked_rate": sum(g["input"] == "block" for g in guards) / n if guards else None,
+        "guard_input_sanitized_rate": sum(g["input"] == "sanitize" for g in guards) / n if guards else None,
+        "guard_output_modified_rate": sum(g["output_modified"] for g in guards) / n if guards else None,
+        "guard_overhead_p95_ms": round(percentile([g["overhead_ms"] for g in guards], 0.95), 3) if guards else None,
         "errors": [r["id"] for r in results if not r["success"]],
         "misclassified": [
             {"id": r["id"], "expected": r["expected"], "predicted": r["predicted"]}
@@ -126,7 +131,8 @@ SCALARS = (
     "schema_valid_rate", "first_try_valid_rate", "retry_rate", "accuracy", "macro_f1",
     "min_class_recall", "action_score", "answer_keyword_coverage", "brier",
     "mean_confidence_correct", "mean_confidence_wrong", "total_cost_usd", "mean_cost_usd",
-    "latency_p50_s", "latency_p95_s",
+    "latency_p50_s", "latency_p95_s", "guard_blocked_rate", "guard_input_sanitized_rate",
+    "guard_output_modified_rate", "guard_overhead_p95_ms",
 )
 
 
@@ -134,7 +140,7 @@ def aggregate(runs: list[dict[str, Any]]) -> dict[str, Any]:
     """Promedio y desvío de las métricas escalares entre corridas repetidas (ADR-022)."""
     summary: dict[str, Any] = {"runs": len(runs), "n": runs[0]["n"]}
     for key in SCALARS:
-        values = [run[key] for run in runs if run[key] is not None]
+        values = [run[key] for run in runs if run.get(key) is not None]
         if not values:
             summary[key] = None
         elif len(values) == 1:

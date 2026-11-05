@@ -1,4 +1,5 @@
-"""Orquestación de una consulta: prompt, proveedor, parseo, validación, reintento y fallback."""
+"""Orquestación de una consulta: guardrail de entrada, prompt, proveedor, parseo, validación,
+reintento, fallback y guardrail de salida."""
 
 from __future__ import annotations
 
@@ -11,6 +12,7 @@ from dataclasses import dataclass, field
 from pydantic import ValidationError
 
 from src.config import ModelConfig
+from src.guardrails import GuardReport, Guardrails, InputVerdict
 from src.observability.pricing import compute_cost
 from src.prompts import PromptSpec
 from src.providers.base import LLMProvider, LLMResponse, ProviderError
@@ -104,6 +106,7 @@ class TriageResult:
     latency_s: float
     cost_usd: float
     error: str | None = field(default=None)
+    guard: GuardReport | None = field(default=None)
 
 
 class TriagePipeline:
@@ -114,6 +117,7 @@ class TriagePipeline:
         prompt: PromptSpec,
         max_retries: int,
         timeout_s: float,
+        guardrails: Guardrails | None = None,
     ) -> None:
         if max_retries < 0:
             raise ValueError("max_retries debe ser >= 0")
@@ -122,12 +126,19 @@ class TriagePipeline:
         self._prompt = prompt
         self._max_retries = max_retries
         self._timeout_s = timeout_s
+        self._guardrails = guardrails
 
     def run(self, query: str) -> TriageResult:
         request_id = uuid.uuid4().hex
         started = time.perf_counter()
-        system, base_user = self._prompt.render(query)
         usage = _Usage()
+        verdict, report = self._check_input(query)
+        if verdict is not None and verdict.blocked:
+            logger.warning("guardrail de entrada: consulta bloqueada (%s)", ", ".join(verdict.flags))
+            return self._result(request_id, self._guardrails.blocked_response(), True, 0, usage, started,
+                                None, report)
+        text = verdict.text if verdict is not None else query
+        system, base_user = self._prompt.render(text)
         attempts = 0
         last_error: str | None = None
 
@@ -158,7 +169,8 @@ class TriagePipeline:
                 logger.warning("intento %d inválido: %s", attempts, last_error)
                 continue
 
-            return self._result(request_id, validated, True, attempts, usage, started, None)
+            validated = self._check_output(validated, query, verdict, report)
+            return self._result(request_id, validated, True, attempts, usage, started, None, report)
 
         logger.error("sin respuesta válida tras %d intentos; se usa fallback", attempts)
         fallback = TriageResponse(
@@ -167,7 +179,30 @@ class TriagePipeline:
             category=Category.OTHER,
             actions=FALLBACK_ACTIONS,
         )
-        return self._result(request_id, fallback, False, attempts, usage, started, last_error)
+        return self._result(request_id, fallback, False, attempts, usage, started, last_error, report)
+
+    def _check_input(self, query: str) -> tuple[InputVerdict | None, GuardReport | None]:
+        if self._guardrails is None:
+            return None, None
+        began = time.perf_counter()
+        verdict = self._guardrails.check_input(query)
+        report = GuardReport(input_action=verdict.action, input_flags=verdict.flags,
+                             removed_sentences=verdict.removed_sentences,
+                             overhead_ms=(time.perf_counter() - began) * 1000)
+        return verdict, report
+
+    def _check_output(self, response: TriageResponse, query: str, verdict: InputVerdict | None,
+                      report: GuardReport | None) -> TriageResponse:
+        if self._guardrails is None or report is None:
+            return response
+        began = time.perf_counter()
+        checked = self._guardrails.check_output(response, query, self._prompt.system, verdict)
+        report.output_flags = checked.flags
+        report.output_modified = checked.modified
+        report.overhead_ms += (time.perf_counter() - began) * 1000
+        if checked.flags:
+            logger.warning("guardrail de salida: %s", ", ".join(checked.flags))
+        return checked.response
 
     def _result(
         self,
@@ -178,6 +213,7 @@ class TriagePipeline:
         usage: _Usage,
         started: float,
         error: str | None,
+        guard: GuardReport | None = None,
     ) -> TriageResult:
         cost = compute_cost(
             usage.prompt_tokens,
@@ -199,4 +235,5 @@ class TriagePipeline:
             latency_s=time.perf_counter() - started,
             cost_usd=cost,
             error=error,
+            guard=guard,
         )

@@ -1,0 +1,85 @@
+# Reglas de los guardrails de entrada y salida (Fase 8, ADR-030 y ADR-031).
+#
+# Los patrones "folded" se aplican sobre texto normalizado: minúsculas, sin tildes,
+# sin caracteres invisibles, leetspeak común (0→o, 1→i, 3→e, 4→a, 5→s, @→a) y
+# letras sueltas unidas ("i g n o r a" → "ignora"). Por eso se escriben sin tildes
+# y en minúsculas. Los patrones "raw" se aplican sobre el texto original.
+#
+# Cambiar este archivo cambia su sha256, que queda registrado en cada resultado de evals.
+
+input:
+  max_chars: 2000                 # se trunca más allá de esto (costo y superficie de ataque)
+  min_words_after_removal: 3      # si al sacar la inyección quedan menos palabras, se bloquea
+
+  # Oraciones con estas señales se eliminan antes de llamar al modelo.
+  injection:
+    - id: ignorar_instrucciones
+      folded: '\b(ignora\w*|ignore|olvida\w*|olvide|esqueca|forget|disregard|omiti\w*|omite|desestima\w*|saltea\w*)\b.{0,40}\b(instruccion\w*|regla\w*|indicacion\w*|instructions?|rules?|instrucoes|regras|anterior\w*|previa\w*|previous|above|prior)\b'
+    - id: cambio_de_rol
+      folded: '\b(a partir de ahora|desde ahora|de ahora en mas|from now on|a partir de agora)\b.{0,30}\b(sos|eres|seras|actua\w*|responde|respondas|you are|you will|act|answer|respond|tu (nuevo )?rol|ignora\w*)\b'
+    - id: actuar_como
+      folded: '\b(actua|actuar|actuas|comportate|hace de cuenta|finge|fingi|pretend|act as|roleplay|role play|juguemos a que)\b.{0,25}\b(como|que sos|que eres|as|to be)\b'
+    - id: jailbreak
+      folded: '\b(do anything now|modo (desarrollador|developer|dios|god|dan|sin restricciones|sin filtros)|developer mode|jailbreak\w*)\b'
+    - id: exfiltracion
+      folded: '\b(system prompt|prompt (del|de) sistema|prompt (inicial|original|completo|oculto)|mensaje (del|de) sistema|(tus|sus|las) instrucciones (iniciales|internas|originales|ocultas|del sistema|de sistema|previas|completas)|your (instructions|system prompt|prompt|rules)|tu prompt|tus reglas internas)\b'
+    - id: mensaje_al_modelo
+      folded: '\b(nota|mensaje|instruccion\w*) (para|al) (el )?(asistente|modelo|bot|ia|chatbot|llm)\b|\b(note|message|instructions?) (to|for) the (assistant|ai|model|bot)\b|\b(nueva|nuevas|new) (instruccion\w*|instructions?|reglas?|rules?)\b\s*:'
+    - id: dictar_salida
+      folded: '\b(category|categoria)\b\W{0,3}(en |a |como )?\W{0,3}(billing|technical|account|other)\b|\b(clasifica\w*|classify|marca\w*)\b.{0,25}\b(como|as)\b\W{0,3}(billing|technical|account|other)\b|\b(confidence|confianza)\b\W{0,3}(en |a |de )?\W{0,3}(1(\.0+)?|100 ?%|0\.\d+)\b'
+    - id: etiqueta_de_rol
+      raw: '(?:^|\s)(?:SYSTEM|SISTEMA|ASSISTANT|ASISTENTE|DEVELOPER)\s*:|(?im:^\s*(?:system|assistant|developer)\s*:)|<\|im_start\|>|\[/?INST\]|(?im:^#+\s*(?:system|instructions?)\b)'
+
+  # Cierre o apertura del delimitador del prompt: se neutraliza, no se elimina.
+  delimiter:
+    raw: '(?i)<\s*/?\s*consulta\s*>'
+
+  # Moderación: no se bloquea (la persona igual necesita respuesta), se escala.
+  moderation:
+    - id: violencia
+      folded: '\b(los|las|te|lo|la|les) (voy|vamos) a (matar|reventar|lastimar|prender fuego)\b|\b(bomba|explosivo|arma de fuego)\b|\b(matar|asesinar)\b.{0,20}\b(empleado\w*|agente\w*|gerente\w*|ustedes|todos)\b'
+    - id: autolesion
+      folded: '\b(me quiero (matar|morir|suicidar)|quiero (morir|suicidarme|matarme)|suicid\w*|no quiero (seguir )?vivir|quitarme la vida|kill myself)\b'
+
+  # Datos sensibles: se ocultan antes de enviarlos al proveedor.
+  sensitive:
+    - id: clave
+      raw: '(?i)\b(contraseña|contrasena|clave|password|pass|pin)\b(\s*(?:es|era|:|=)\s*)(\S*[\d!@#$%&*]\S*)'
+      replacement: '\1\2[dato oculto]'
+    - id: codigo_seguridad
+      raw: '(?i)\b(cvv|cvc|c[oó]digo de seguridad)\b(\D{0,5})\d{3,4}\b'
+      replacement: '\1\2[dato oculto]'
+    # Las tarjetas se detectan en código (dígitos + algoritmo de Luhn).
+
+output:
+  # Señales de que la respuesta filtra instrucciones internas.
+  leak_markers: '\bjson schema\b|<\s*/?\s*consulta\s*>|\binternal_fields\b|\breasoning\b|##\s*(seguridad|categorias|formato|ejemplos)'
+  leak_shingle_words: 8           # n palabras seguidas copiadas del prompt (sin ejemplos ni contrato)
+
+  # Pedirle al cliente datos que nunca se piden por este canal.
+  sensitive_request: '\b(envianos|enviame|envia|mandanos|mandame|manda|pasanos|pasame|indicanos|indicame|indica|compartinos|comparti|comparte|decinos|decime|dinos|dime|proporcionanos|proporciona|facilitanos|facilita)\b.{0,40}\b(contrasena|clave|password|codigo de verificacion|codigo (de )?2fa|codigo que te llego|numero (completo )?de (la |tu )?tarjeta|cvv|cvc|codigo de seguridad)\b'
+
+  # Afirmaciones que el servicio no puede respaldar: políticas comerciales, plazos y montos
+  # que no estaban en la consulta.
+  unverified:
+    - id: politica_comercial
+      folded: '(?<!si )\b(ofrecemos|tenemos|contamos con|hay|existen?|aplicamos|otorgamos|brindamos)\b (un |una |unos |unas |algun\w* )?(descuento|promocion|bonificacion|precio especial)\w*'
+    - id: porcentaje
+      folded: '\b\d{1,3}([.,]\d+)? ?%'
+      unless_in_query: true
+    - id: plazo
+      folded: '\b(en|dentro de) (las proximas |los proximos )?(\d+|un|una|dos|tres|cuatro|cinco|siete|diez|quince) (minutos|horas|hs|dias habiles|dias|semanas)\b'
+      unless_in_query: true
+    - id: monto
+      folded: '\$ ?\d[\d.,]*'
+      unless_in_query: true
+
+texts:
+  safe_answer: "Recibimos tu mensaje. Una persona de nuestro equipo lo va a revisar y te va a responder a la brevedad."
+  neutral_answer: "Gracias por tu consulta. Una persona de nuestro equipo la va a revisar y te va a responder con la información confirmada."
+  actions:
+    manipulacion: "Revisar posible intento de manipulación en el ticket"
+    escalar: "Escalar con prioridad a un supervisor"
+    datos_sensibles: "Recordar al cliente que no comparta claves ni datos de tarjeta por este canal"
+    revisar_respuesta: "Revisar la respuesta sugerida antes de enviarla: el guardrail la reemplazó"
+    humano: "Escalar la consulta a un agente humano"
