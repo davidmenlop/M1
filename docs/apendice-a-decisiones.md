@@ -239,6 +239,15 @@
 - **Alternativas:** editar v3 (rompe la trazabilidad de los resultados ya guardados); dejar el conflicto y aceptar el error (mide al modelo contra una regla que nadie le dio); agregar ejemplos parecidos a `bil-03` (sería entrenar con el examen).
 - **Consecuencias:** las reglas salen de la guía, no de los errores observados, pero se eligieron sabiendo cuáles casos fallaban: hay riesgo de sobreajuste a dev. El holdout tiene solo 8 casos, así que es una confirmación débil y así se reporta.
 
+## ADR-028 — Haiku 5.5 con v4 como combinación elegida; v4 como prompt predeterminado
+
+- **Fecha:** 2026-11-04
+- **Estado:** aceptada
+- **Contexto:** la Fase 7 corrió 4 prompts × 3 modelos en dev y aplicó el criterio de ADR-022 con `evals/select.py`.
+- **Decisión:** gana `claude-haiku-5-5` con v4: macro-F1 1.000 (3 corridas), empatado con `gpt-4.1-mini` + v4 en F1 y action score, y a la mitad de costo (USD 0.0005 por request). Confirmado en holdout (8/8 en 3 corridas). `DEFAULT_PROMPT_VERSION` pasa a v4. El proveedor predeterminado sigue siendo `mock` (ADR-012): usar el ganador exige `--provider anthropic --model haiku-5-5`.
+- **Alternativas:** `gpt-4.1-mini` + v4 (mismo resultado, el doble de costo, menor latencia: 1.75 s vs 2.79 s de p95; sería la elección si la latencia importara más que el costo, pero el criterio fijado no lo dice); Haiku 4.5 + v2 (el ganador sin v4; casi 5 veces más caro); cambiar la clave `default` de Anthropic a Haiku 5.5 (rompería el significado de las corridas ya guardadas con `model_key: default`).
+- **Consecuencias:** el resultado en dev es optimista (ADR-027) y el holdout no tiene casos que prueben las reglas nuevas, así que la confirmación es débil. Pendiente: casos nuevos de baja y email de facturas, escritos sin mirar los resultados. Con 0 errores en dev, la calibración de `confidence` no se puede evaluar.
+
 ## ADR-011 — Rama `master`
 
 - **Fecha:** 2026-10-22

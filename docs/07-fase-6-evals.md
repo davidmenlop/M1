@@ -160,4 +160,4 @@ Cada modelo se corrió dos veces: la primera quedó `dirty` (una prueba por CLI 
 
 ---
 
-**Anterior:** [Capítulo 6 — Dataset](06-fase-5-dataset.md) · **Siguiente:** Capítulo 8 — Iteración empírica (Fase 7, pendiente)
+**Anterior:** [Capítulo 6 — Dataset](06-fase-5-dataset.md) · **Siguiente:** [Capítulo 8 — Iteración empírica](08-fase-7-iteracion.md)

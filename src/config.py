@@ -79,7 +79,7 @@ def load_settings() -> Settings:
 
     return Settings(
         default_provider=_env("DEFAULT_PROVIDER", str(providers["default_provider"])),
-        default_prompt_version=_env("DEFAULT_PROMPT_VERSION", "v1"),
+        default_prompt_version=_env("DEFAULT_PROMPT_VERSION", "v4"),
         max_retries=max_retries,
         request_timeout_s=timeout_s,
         metrics_path=metrics_path,
