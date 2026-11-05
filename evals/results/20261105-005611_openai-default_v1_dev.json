@@ -1,0 +1,1610 @@
+{
+  "meta": {
+    "created_at": "2026-11-05T00:56:10+00:00",
+    "provider": "openai",
+    "model_key": "default",
+    "model_id": "gpt-4.1-mini",
+    "temperature": 0.0,
+    "effort": null,
+    "prompt_version": "v1",
+    "prompt_file": "v1_zero_shot.yaml",
+    "prompt_sha256": "3e171882451ee9dad7a54f9689ad03a4d9d08bd13aa2ddbc8a21cdda2ffdef76",
+    "dataset_sha256": "1495e846dfcbf2e66a52cb275a4eeb6231984ecf4730749acfabb5bc7f873253",
+    "split": "dev",
+    "case_ids": [
+      "bil-01",
+      "bil-02",
+      "bil-03",
+      "bil-05",
+      "bil-06",
+      "bil-07",
+      "bil-08",
+      "tec-01",
+      "tec-02",
+      "tec-03",
+      "tec-05",
+      "tec-06",
+      "tec-08",
+      "acc-01",
+      "acc-02",
+      "acc-04",
+      "acc-05",
+      "acc-06",
+      "acc-08",
+      "oth-01",
+      "oth-02",
+      "oth-04",
+      "oth-06",
+      "oth-07",
+      "oth-08",
+      "edge-01",
+      "edge-02",
+      "edge-03",
+      "edge-04",
+      "edge-05",
+      "edge-07",
+      "edge-08"
+    ],
+    "repeat": 1,
+    "max_retries": 2,
+    "git": {
+      "commit": "ee4e639",
+      "dirty": false
+    }
+  },
+  "summary": {
+    "runs": 1,
+    "n": 32,
+    "schema_valid_rate": 1.0,
+    "first_try_valid_rate": 1.0,
+    "retry_rate": 0.0,
+    "accuracy": 0.90625,
+    "macro_f1": 0.9079656862745098,
+    "min_class_recall": 0.7777777777777778,
+    "action_score": 0.890625,
+    "answer_keyword_coverage": 0.9583333333333334,
+    "brier": 0.08859375,
+    "mean_confidence_correct": 0.9275862068965517,
+    "mean_confidence_wrong": 0.9333333333333332,
+    "total_cost_usd": 0.011952,
+    "mean_cost_usd": 0.0003735,
+    "latency_p50_s": 1.2816,
+    "latency_p95_s": 1.8156
+  },
+  "thresholds": {
+    "schema_valid_rate": {
+      "limit": 1.0,
+      "observed": 1.0,
+      "passed": true
+    },
+    "accuracy": {
+      "limit": 0.85,
+      "observed": 0.90625,
+      "passed": true
+    },
+    "min_class_recall": {
+      "limit": 0.75,
+      "observed": 0.7777777777777778,
+      "passed": true
+    },
+    "mean_cost_usd": {
+      "limit": 0.01,
+      "observed": 0.0003735,
+      "passed": true
+    }
+  },
+  "runs": [
+    {
+      "metrics": {
+        "n": 32,
+        "schema_valid_rate": 1.0,
+        "first_try_valid_rate": 1.0,
+        "retry_rate": 0.0,
+        "accuracy": 0.90625,
+        "macro_f1": 0.9079656862745098,
+        "min_class_recall": 0.7777777777777778,
+        "per_class": {
+          "billing": {
+            "support": 7,
+            "precision": 0.7,
+            "recall": 1.0,
+            "f1": 0.8235294117647058
+          },
+          "technical": {
+            "support": 8,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0
+          },
+          "account": {
+            "support": 9,
+            "precision": 1.0,
+            "recall": 0.7777777777777778,
+            "f1": 0.8750000000000001
+          },
+          "other": {
+            "support": 8,
+            "precision": 1.0,
+            "recall": 0.875,
+            "f1": 0.9333333333333333
+          }
+        },
+        "confusion_matrix": {
+          "billing": {
+            "billing": 7,
+            "technical": 0,
+            "account": 0,
+            "other": 0
+          },
+          "technical": {
+            "billing": 0,
+            "technical": 8,
+            "account": 0,
+            "other": 0
+          },
+          "account": {
+            "billing": 2,
+            "technical": 0,
+            "account": 7,
+            "other": 0
+          },
+          "other": {
+            "billing": 1,
+            "technical": 0,
+            "account": 0,
+            "other": 7
+          }
+        },
+        "accuracy_by_difficulty": {
+          "easy": {
+            "n": 12,
+            "accuracy": 1.0
+          },
+          "hard": {
+            "n": 6,
+            "accuracy": 1.0
+          },
+          "medium": {
+            "n": 14,
+            "accuracy": 0.7857142857142857
+          }
+        },
+        "action_score": 0.890625,
+        "answer_keyword_coverage": 0.9583333333333334,
+        "brier": 0.08859375,
+        "mean_confidence_correct": 0.9275862068965517,
+        "mean_confidence_wrong": 0.9333333333333332,
+        "prompt_tokens": 16696,
+        "completion_tokens": 3296,
+        "total_cost_usd": 0.011952,
+        "mean_cost_usd": 0.0003735,
+        "latency_p50_s": 1.2816,
+        "latency_p95_s": 1.8156,
+        "errors": [],
+        "misclassified": [
+          {
+            "id": "bil-03",
+            "expected": "account",
+            "predicted": "billing"
+          },
+          {
+            "id": "bil-08",
+            "expected": "account",
+            "predicted": "billing"
+          },
+          {
+            "id": "oth-01",
+            "expected": "other",
+            "predicted": "billing"
+          }
+        ]
+      },
+      "cases": [
+        {
+          "id": "bil-01",
+          "difficulty": "easy",
+          "tags": [],
+          "expected": "billing",
+          "predicted": "billing",
+          "confidence": 0.95,
+          "answer": "Lamentamos el inconveniente. Vamos a revisar el cobro duplicado y procederemos a realizar el reintegro correspondiente a la mayor brevedad posible.",
+          "actions": [
+            "Verificar los movimientos de facturación del cliente en el sistema.",
+            "Confirmar el cobro duplicado y procesar el reintegro.",
+            "Informar al cliente sobre el estado y tiempos estimados del reintegro."
+          ],
+          "expected_actions": [
+            {
+              "intent": "Verificar los cobros del período",
+              "keywords": [
+                "cobro",
+                "debito",
+                "pago",
+                "cargo",
+                "movimiento"
+              ]
+            },
+            {
+              "intent": "Reintegrar el cobro duplicado",
+              "keywords": [
+                "reintegr",
+                "reembols",
+                "devol",
+                "anular",
+                "acredit"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "cobro"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 523,
+          "completion_tokens": 94,
+          "token_source": "api",
+          "cost_usd": 0.0003596,
+          "latency_s": 2.1527,
+          "error": null
+        },
+        {
+          "id": "bil-02",
+          "difficulty": "easy",
+          "tags": [],
+          "expected": "billing",
+          "predicted": "billing",
+          "confidence": 0.95,
+          "answer": "Puedes descargar la factura de octubre en formato PDF desde el panel de facturación en tu cuenta. Si no la encuentras, por favor verifica que estés en la sección correcta o contáctanos para ayudarte a obtenerla.",
+          "actions": [
+            "Verificar en el sistema si la factura de octubre está generada y disponible para descarga.",
+            "Guiar al cliente para acceder a la sección de facturación en el panel.",
+            "Enviar la factura de octubre en PDF al cliente si no puede descargarla."
+          ],
+          "expected_actions": [
+            {
+              "intent": "Ubicar y enviar la factura",
+              "keywords": [
+                "factura",
+                "comprobante"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "factura"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 517,
+          "completion_tokens": 129,
+          "token_source": "api",
+          "cost_usd": 0.0004132,
+          "latency_s": 1.7396,
+          "error": null
+        },
+        {
+          "id": "bil-03",
+          "difficulty": "medium",
+          "tags": [
+            "cancelacion"
+          ],
+          "expected": "account",
+          "predicted": "billing",
+          "confidence": 0.95,
+          "answer": "Para dar de baja su suscripción a fin de mes, por favor confirme su solicitud y le indicaremos los pasos a seguir para completar la cancelación sin inconvenientes.",
+          "actions": [
+            "Verificar el estado actual de la suscripción del cliente",
+            "Confirmar la fecha de finalización solicitada para la baja",
+            "Guiar al cliente en el proceso de cancelación o realizarla si está autorizado"
+          ],
+          "expected_actions": [
+            {
+              "intent": "Procesar la baja de la suscripción",
+              "keywords": [
+                "baja",
+                "cancel"
+              ]
+            },
+            {
+              "intent": "Confirmar la fecha de fin del ciclo de facturación",
+              "keywords": [
+                "fecha",
+                "ciclo",
+                "periodo",
+                "fin de mes",
+                "renov"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "baja"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 521,
+          "completion_tokens": 92,
+          "token_source": "api",
+          "cost_usd": 0.0003556,
+          "latency_s": 1.2476,
+          "error": null
+        },
+        {
+          "id": "bil-05",
+          "difficulty": "medium",
+          "tags": [
+            "precio"
+          ],
+          "expected": "billing",
+          "predicted": "billing",
+          "confidence": 0.95,
+          "answer": "Lamentamos la confusión. Revisaremos su caso para verificar el cambio en el precio y le informaremos si hubo algún error o ajuste en su suscripción.",
+          "actions": [
+            "Verificar historial de facturación y cambios de precio en la cuenta del cliente",
+            "Confirmar si hubo notificación previa sobre el cambio de precio",
+            "Contactar al cliente para explicar la situación y ofrecer soluciones si corresponde"
+          ],
+          "expected_actions": [
+            {
+              "intent": "Verificar el cambio de tarifa en la cuenta",
+              "keywords": [
+                "tarifa",
+                "precio",
+                "plan",
+                "factur"
+              ]
+            },
+            {
+              "intent": "Informar el motivo o ajustar el cargo",
+              "keywords": [
+                "inform",
+                "explic",
+                "ajust",
+                "bonific"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "precio"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 523,
+          "completion_tokens": 92,
+          "token_source": "api",
+          "cost_usd": 0.0003564,
+          "latency_s": 1.4131,
+          "error": null
+        },
+        {
+          "id": "bil-06",
+          "difficulty": "easy",
+          "tags": [],
+          "expected": "billing",
+          "predicted": "billing",
+          "confidence": 0.95,
+          "answer": "Gracias por contactarnos. Vamos a verificar el estado de su pago por transferencia. Por favor, envíenos el comprobante de la transferencia para agilizar la revisión y actualizar su cuenta.",
+          "actions": [
+            "Solicitar al cliente el comprobante de la transferencia.",
+            "Verificar en el sistema si el pago fue registrado correctamente.",
+            "Actualizar el estado de la cuenta del cliente y confirmar con él."
+          ],
+          "expected_actions": [
+            {
+              "intent": "Verificar la transferencia recibida",
+              "keywords": [
+                "transferencia",
+                "comprobante",
+                "acredit",
+                "pago"
+              ]
+            },
+            {
+              "intent": "Regularizar el estado de la cuenta",
+              "keywords": [
+                "deuda",
+                "saldo",
+                "estado",
+                "regulariz",
+                "imput"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "transferencia"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 519,
+          "completion_tokens": 110,
+          "token_source": "api",
+          "cost_usd": 0.0003836,
+          "latency_s": 1.2292,
+          "error": null
+        },
+        {
+          "id": "bil-07",
+          "difficulty": "easy",
+          "tags": [],
+          "expected": "billing",
+          "predicted": "billing",
+          "confidence": 0.95,
+          "answer": "Lamentamos el inconveniente. Por favor, verifique que la suscripción anual esté activa en su cuenta. Si el cobro mensual persiste, contáctenos con los detalles para corregirlo y evitar cargos indebidos.",
+          "actions": [
+            "Verificar el estado de la suscripción del cliente",
+            "Confirmar si se ha realizado el cambio al plan anual",
+            "Gestionar la corrección de cobros erróneos si aplica"
+          ],
+          "expected_actions": [
+            {
+              "intent": "Verificar el plan contratado",
+              "keywords": [
+                "plan",
+                "anual",
+                "suscrip"
+              ]
+            },
+            {
+              "intent": "Reintegrar o compensar la diferencia",
+              "keywords": [
+                "reintegr",
+                "reembols",
+                "devol",
+                "diferencia",
+                "nota de credito"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "plan"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 514,
+          "completion_tokens": 100,
+          "token_source": "api",
+          "cost_usd": 0.0003656,
+          "latency_s": 1.1447,
+          "error": null
+        },
+        {
+          "id": "bil-08",
+          "difficulty": "medium",
+          "tags": [
+            "email"
+          ],
+          "expected": "account",
+          "predicted": "billing",
+          "confidence": 0.95,
+          "answer": "Claro, podemos enviar las facturas al correo facturas@empresa.com. Por favor, confirme que desea que actualicemos el email de envío de facturas a esa dirección.",
+          "actions": [
+            "Verificar la dirección de correo proporcionada por el cliente.",
+            "Actualizar el correo de envío de facturas en el sistema si el cliente confirma.",
+            "Informar al cliente una vez realizado el cambio."
+          ],
+          "expected_actions": [
+            {
+              "intent": "Actualizar el email de facturación",
+              "keywords": [
+                "email",
+                "correo",
+                "mail",
+                "destinatario"
+              ]
+            },
+            {
+              "intent": "Reenviar las facturas",
+              "keywords": [
+                "reenvi",
+                "enviar",
+                "factura"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "factura"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 523,
+          "completion_tokens": 91,
+          "token_source": "api",
+          "cost_usd": 0.0003548,
+          "latency_s": 1.2073,
+          "error": null
+        },
+        {
+          "id": "tec-01",
+          "difficulty": "easy",
+          "tags": [],
+          "expected": "technical",
+          "predicted": "technical",
+          "confidence": 0.95,
+          "answer": "Lamentamos el inconveniente con el error 500 al filtrar por fecha en el dashboard. Por favor, intente refrescar la página o cerrar y volver a abrir sesión. Si el problema persiste, avísenos para que nuestro equipo técnico lo revise a fondo.",
+          "actions": [
+            "Verificar logs del servidor para identificar la causa del error 500.",
+            "Reproducir el error en ambiente de prueba para diagnosticar el problema.",
+            "Informar al equipo de desarrollo para priorizar la solución."
+          ],
+          "expected_actions": [
+            {
+              "intent": "Reproducir el problema",
+              "keywords": [
+                "reproduc",
+                "replic"
+              ]
+            },
+            {
+              "intent": "Escalar a ingeniería o revisar logs",
+              "keywords": [
+                "escal",
+                "ingenier",
+                "log"
+              ]
+            }
+          ],
+          "answer_keywords": [],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 512,
+          "completion_tokens": 115,
+          "token_source": "api",
+          "cost_usd": 0.0003888,
+          "latency_s": 1.2477,
+          "error": null
+        },
+        {
+          "id": "tec-02",
+          "difficulty": "easy",
+          "tags": [
+            "integracion"
+          ],
+          "expected": "technical",
+          "predicted": "technical",
+          "confidence": 0.95,
+          "answer": "Lamentamos que la integración con Mercado Libre no esté sincronizando los pedidos. Por favor, verifique que la conexión esté activa y que no haya cambios recientes en las credenciales o permisos. Si el problema persiste, contáctenos para que podamos investigar y resolverlo cuanto antes.",
+          "actions": [
+            "Verificar el estado de la integración con Mercado Libre en el sistema.",
+            "Confirmar si hubo cambios recientes en credenciales o permisos del cliente.",
+            "Escalar a soporte técnico para revisión detallada y solución."
+          ],
+          "expected_actions": [
+            {
+              "intent": "Revisar la conexión de la integración",
+              "keywords": [
+                "integraci",
+                "mercado libre",
+                "conexion",
+                "token",
+                "credencial"
+              ]
+            },
+            {
+              "intent": "Resincronizar o escalar",
+              "keywords": [
+                "sincroniz",
+                "escal",
+                "ingenier"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "integraci"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 516,
+          "completion_tokens": 115,
+          "token_source": "api",
+          "cost_usd": 0.0003904,
+          "latency_s": 1.2523,
+          "error": null
+        },
+        {
+          "id": "tec-03",
+          "difficulty": "easy",
+          "tags": [
+            "rendimiento"
+          ],
+          "expected": "technical",
+          "predicted": "technical",
+          "confidence": 0.95,
+          "answer": "Lamentamos la lentitud que estás experimentando. Por favor, intenta cerrar y volver a abrir la aplicación, y verifica tu conexión a internet. Si el problema persiste, contáctanos para que podamos ayudarte a resolverlo.",
+          "actions": [
+            "Verificar estado del servidor y reportes de rendimiento.",
+            "Solicitar detalles adicionales al cliente sobre el dispositivo y conexión.",
+            "Escalar a soporte técnico si el problema continúa."
+          ],
+          "expected_actions": [
+            {
+              "intent": "Medir o reproducir la lentitud",
+              "keywords": [
+                "reproduc",
+                "rendimiento",
+                "latencia",
+                "tiempo de carga",
+                "lentitud"
+              ]
+            },
+            {
+              "intent": "Escalar a ingeniería o infraestructura",
+              "keywords": [
+                "escal",
+                "ingenier",
+                "infraestructura"
+              ]
+            }
+          ],
+          "answer_keywords": [],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 517,
+          "completion_tokens": 97,
+          "token_source": "api",
+          "cost_usd": 0.000362,
+          "latency_s": 1.2835,
+          "error": null
+        },
+        {
+          "id": "tec-05",
+          "difficulty": "medium",
+          "tags": [
+            "email"
+          ],
+          "expected": "technical",
+          "predicted": "technical",
+          "confidence": 0.9,
+          "answer": "Lamentamos que no estés recibiendo las notificaciones por correo electrónico cuando entra un pedido nuevo. Por favor, verifica que las notificaciones estén habilitadas en la configuración de tu cuenta y que el correo registrado sea el correcto. Si el problema persiste, contáctanos para revisar la configuración técnica de tu cuenta.",
+          "actions": [
+            "Verificar configuración de notificaciones del cliente.",
+            "Confirmar que el correo electrónico registrado es correcto.",
+            "Revisar logs del sistema para detectar posibles fallos en el envío de correos."
+          ],
+          "expected_actions": [
+            {
+              "intent": "Revisar la configuración de notificaciones",
+              "keywords": [
+                "notificaci",
+                "configuraci",
+                "alerta"
+              ]
+            },
+            {
+              "intent": "Verificar el envío de los correos",
+              "keywords": [
+                "spam",
+                "envio",
+                "entrega",
+                "correo",
+                "mail"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "notificaci"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 515,
+          "completion_tokens": 120,
+          "token_source": "api",
+          "cost_usd": 0.000398,
+          "latency_s": 1.4124,
+          "error": null
+        },
+        {
+          "id": "tec-06",
+          "difficulty": "hard",
+          "tags": [
+            "reportes"
+          ],
+          "expected": "technical",
+          "predicted": "technical",
+          "confidence": 0.9,
+          "answer": "Gracias por reportar la discrepancia en el reporte de ventas mensual. Por favor, verifique si hay facturas pendientes de sincronización o ajustes manuales que puedan afectar el total. Estamos revisando el sistema para identificar posibles errores en el cálculo.",
+          "actions": [
+            "Verificar la integridad y sincronización de las facturas en el sistema.",
+            "Revisar si hay ajustes manuales o notas de crédito que afecten el total del reporte.",
+            "Escalar a soporte técnico para investigar posibles errores en el cálculo del reporte."
+          ],
+          "expected_actions": [
+            {
+              "intent": "Comparar el reporte con los datos de origen",
+              "keywords": [
+                "compar",
+                "conciliar",
+                "diferencia",
+                "verificar los datos",
+                "origen"
+              ]
+            },
+            {
+              "intent": "Escalar a ingeniería o revisar logs",
+              "keywords": [
+                "escal",
+                "ingenier",
+                "log"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "reporte"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 518,
+          "completion_tokens": 137,
+          "token_source": "api",
+          "cost_usd": 0.0004264,
+          "latency_s": 1.9084,
+          "error": null
+        },
+        {
+          "id": "tec-08",
+          "difficulty": "medium",
+          "tags": [
+            "api"
+          ],
+          "expected": "technical",
+          "predicted": "technical",
+          "confidence": 0.95,
+          "answer": "El código 429 indica que está excediendo el límite de llamadas permitidas a la API. Por favor, revise la documentación para conocer los límites de uso y asegúrese de no superar la cantidad máxima de solicitudes permitidas en un período determinado. Si considera que está dentro del límite y sigue recibiendo este error, contáctenos para investigar el problema.",
+          "actions": [
+            "Verificar los límites de uso de la API para el cliente.",
+            "Confirmar si hay incidencias o bloqueos en el sistema de API.",
+            "Contactar al equipo técnico para revisar logs y posibles errores en la cuenta del cliente."
+          ],
+          "expected_actions": [
+            {
+              "intent": "Revisar límites y consumo de la API",
+              "keywords": [
+                "limite",
+                "rate",
+                "cuota",
+                "consumo",
+                "llamada"
+              ]
+            },
+            {
+              "intent": "Escalar a ingeniería o revisar logs",
+              "keywords": [
+                "escal",
+                "ingenier",
+                "log"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "429"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 517,
+          "completion_tokens": 135,
+          "token_source": "api",
+          "cost_usd": 0.0004228,
+          "latency_s": 1.3925,
+          "error": null
+        },
+        {
+          "id": "acc-01",
+          "difficulty": "medium",
+          "tags": [
+            "acceso",
+            "email"
+          ],
+          "expected": "account",
+          "predicted": "account",
+          "confidence": 0.95,
+          "answer": "Lamentamos que no recibas el correo de recuperación. Por favor, revisa tu carpeta de spam o correo no deseado. Si el problema persiste, podemos ayudarte a restablecer tu contraseña manualmente.",
+          "actions": [
+            "Verificar que el correo registrado sea correcto",
+            "Enviar instrucciones manuales para restablecer la contraseña",
+            "Confirmar con el cliente que recibió el correo de recuperación"
+          ],
+          "expected_actions": [
+            {
+              "intent": "Verificar el email registrado en la cuenta",
+              "keywords": [
+                "email",
+                "correo",
+                "mail",
+                "direccion"
+              ]
+            },
+            {
+              "intent": "Reenviar o forzar el restablecimiento",
+              "keywords": [
+                "recuper",
+                "restablec",
+                "reenvi",
+                "enlace",
+                "link"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "contrase"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 515,
+          "completion_tokens": 92,
+          "token_source": "api",
+          "cost_usd": 0.0003532,
+          "latency_s": 1.0283,
+          "error": null
+        },
+        {
+          "id": "acc-02",
+          "difficulty": "easy",
+          "tags": [
+            "usuarios"
+          ],
+          "expected": "account",
+          "predicted": "account",
+          "confidence": 0.95,
+          "answer": "Para agregar dos usuarios nuevos a tu equipo de ventas, por favor accede a la sección de configuración de usuarios en tu cuenta y sigue las instrucciones para añadir nuevos miembros. Si necesitas ayuda, estamos aquí para asistirte.",
+          "actions": [
+            "Verificar el plan actual del cliente para confirmar si permite agregar usuarios adicionales",
+            "Guiar al cliente en el proceso de agregar usuarios si solicita asistencia",
+            "Confirmar que los usuarios agregados tengan los permisos adecuados para el equipo de ventas"
+          ],
+          "expected_actions": [
+            {
+              "intent": "Verificar la identidad o el rol del solicitante",
+              "keywords": [
+                "identidad",
+                "titular",
+                "administrador",
+                "verificar que",
+                "confirmar que"
+              ]
+            },
+            {
+              "intent": "Crear los usuarios",
+              "keywords": [
+                "crear",
+                "alta",
+                "agregar",
+                "usuario"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "usuario"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 513,
+          "completion_tokens": 106,
+          "token_source": "api",
+          "cost_usd": 0.0003748,
+          "latency_s": 1.4857,
+          "error": null
+        },
+        {
+          "id": "acc-04",
+          "difficulty": "hard",
+          "tags": [
+            "permisos"
+          ],
+          "expected": "account",
+          "predicted": "account",
+          "confidence": 0.95,
+          "answer": "Es probable que a su contador le falten permisos para acceder al módulo de facturación. Por favor, revise los permisos asignados a su usuario y asegúrese de habilitar el acceso al módulo correspondiente.",
+          "actions": [
+            "Verificar los permisos asignados al usuario del contador",
+            "Confirmar si el módulo de facturación está habilitado para ese usuario",
+            "Guiar al cliente para modificar permisos si es necesario"
+          ],
+          "expected_actions": [
+            {
+              "intent": "Revisar el rol y los permisos del usuario",
+              "keywords": [
+                "rol",
+                "permiso",
+                "perfil",
+                "acceso"
+              ]
+            },
+            {
+              "intent": "Asignar el permiso correspondiente",
+              "keywords": [
+                "asign",
+                "otorg",
+                "habilit",
+                "agreg"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "permiso"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 519,
+          "completion_tokens": 95,
+          "token_source": "api",
+          "cost_usd": 0.0003596,
+          "latency_s": 1.024,
+          "error": null
+        },
+        {
+          "id": "acc-05",
+          "difficulty": "easy",
+          "tags": [
+            "2fa"
+          ],
+          "expected": "account",
+          "predicted": "account",
+          "confidence": 0.95,
+          "answer": "Lamentamos que hayas perdido el celular. Para recuperar el acceso, por favor contacta a nuestro soporte con una identificación válida para verificar tu identidad y ayudarte a desactivar la verificación en dos pasos o configurar un nuevo método de autenticación.",
+          "actions": [
+            "Verificar la identidad del cliente mediante preguntas de seguridad o documentos.",
+            "Guiar al cliente para desactivar la verificación en dos pasos temporalmente.",
+            "Asistir al cliente en configurar un nuevo método de autenticación si es necesario."
+          ],
+          "expected_actions": [
+            {
+              "intent": "Verificar la identidad o el rol del solicitante",
+              "keywords": [
+                "identidad",
+                "titular",
+                "administrador",
+                "verificar que",
+                "confirmar que"
+              ]
+            },
+            {
+              "intent": "Restablecer la verificación en dos pasos",
+              "keywords": [
+                "2fa",
+                "dos pasos",
+                "doble factor",
+                "verificacion",
+                "desactiv",
+                "restablec"
+              ]
+            }
+          ],
+          "answer_keywords": [],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 519,
+          "completion_tokens": 112,
+          "token_source": "api",
+          "cost_usd": 0.0003868,
+          "latency_s": 1.2333,
+          "error": null
+        },
+        {
+          "id": "acc-06",
+          "difficulty": "medium",
+          "tags": [
+            "permisos"
+          ],
+          "expected": "account",
+          "predicted": "account",
+          "confidence": 0.95,
+          "answer": "Para cambiar el administrador de la cuenta y asignar a tu socio como nuevo administrador, debes acceder a la configuración de usuarios en tu cuenta y modificar los roles correspondientes. Si necesitas ayuda, podemos guiarte en el proceso.",
+          "actions": [
+            "Verificar los permisos actuales del cliente y su socio",
+            "Guiar al cliente para cambiar roles en la configuración de usuarios",
+            "Confirmar que el cambio se realizó correctamente"
+          ],
+          "expected_actions": [
+            {
+              "intent": "Verificar la identidad o el rol del solicitante",
+              "keywords": [
+                "identidad",
+                "titular",
+                "administrador",
+                "verificar que",
+                "confirmar que"
+              ]
+            },
+            {
+              "intent": "Transferir el rol de administrador",
+              "keywords": [
+                "rol",
+                "administrador",
+                "transfer",
+                "permiso",
+                "cambi"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "administrador"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 520,
+          "completion_tokens": 94,
+          "token_source": "api",
+          "cost_usd": 0.0003584,
+          "latency_s": 1.4082,
+          "error": null
+        },
+        {
+          "id": "acc-08",
+          "difficulty": "hard",
+          "tags": [
+            "cancelacion"
+          ],
+          "expected": "account",
+          "predicted": "account",
+          "confidence": 0.95,
+          "answer": "Para eliminar su cuenta y todos sus datos, por favor confirme su solicitud respondiendo a este mensaje. Una vez confirmado, procederemos a eliminar su cuenta de forma permanente y no podrá recuperarla.",
+          "actions": [
+            "Verificar la identidad del cliente para proceder con la eliminación.",
+            "Confirmar con el cliente que entiende que la eliminación es irreversible.",
+            "Ejecutar la eliminación de la cuenta y datos tras la confirmación."
+          ],
+          "expected_actions": [
+            {
+              "intent": "Verificar la identidad o el rol del solicitante",
+              "keywords": [
+                "identidad",
+                "titular",
+                "administrador",
+                "verificar que",
+                "confirmar que"
+              ]
+            },
+            {
+              "intent": "Informar el proceso de eliminación y exportación de datos",
+              "keywords": [
+                "elimin",
+                "borr",
+                "export",
+                "respaldo",
+                "datos"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "elimin"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 517,
+          "completion_tokens": 97,
+          "token_source": "api",
+          "cost_usd": 0.000362,
+          "latency_s": 1.3043,
+          "error": null
+        },
+        {
+          "id": "oth-01",
+          "difficulty": "medium",
+          "tags": [
+            "precio"
+          ],
+          "expected": "other",
+          "predicted": "billing",
+          "confidence": 0.9,
+          "answer": "Sí, ofrecemos descuentos por pago anual adelantado. Por favor, contáctanos para conocer las opciones y beneficios específicos que aplican a tu plan.",
+          "actions": [
+            "Confirmar si el cliente está interesado en un plan específico",
+            "Proporcionar detalles actuales de descuentos por pago anual",
+            "Enviar información comercial actualizada sobre planes y descuentos"
+          ],
+          "expected_actions": [
+            {
+              "intent": "Derivar al equipo comercial",
+              "keywords": [
+                "comercial",
+                "ventas",
+                "asesor"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "descuento"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 515,
+          "completion_tokens": 79,
+          "token_source": "api",
+          "cost_usd": 0.0003324,
+          "latency_s": 0.9316,
+          "error": null
+        },
+        {
+          "id": "oth-02",
+          "difficulty": "easy",
+          "tags": [],
+          "expected": "other",
+          "predicted": "other",
+          "confidence": 0.95,
+          "answer": "Gracias por tu interés en Nubbix. Para agendar una demo para tu equipo, por favor indícanos la fecha y hora que prefieres, y un representante se pondrá en contacto contigo para coordinarla.",
+          "actions": [
+            "Contactar al cliente para coordinar la fecha y hora de la demo",
+            "Enviar información sobre las funcionalidades y beneficios del producto",
+            "Registrar la solicitud de demo en el sistema de seguimiento"
+          ],
+          "expected_actions": [
+            {
+              "intent": "Derivar al equipo comercial",
+              "keywords": [
+                "comercial",
+                "ventas",
+                "asesor"
+              ]
+            },
+            {
+              "intent": "Coordinar la demo",
+              "keywords": [
+                "demo",
+                "agend",
+                "reunion",
+                "coordin"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "demo"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 514,
+          "completion_tokens": 98,
+          "token_source": "api",
+          "cost_usd": 0.0003624,
+          "latency_s": 1.3064,
+          "error": null
+        },
+        {
+          "id": "oth-04",
+          "difficulty": "easy",
+          "tags": [
+            "sugerencia"
+          ],
+          "expected": "other",
+          "predicted": "other",
+          "confidence": 0.9,
+          "answer": "Gracias por tu sugerencia sobre el modo oscuro. La hemos registrado para considerar su implementación en futuras actualizaciones.",
+          "actions": [
+            "Registrar la sugerencia del cliente en el sistema de feedback.",
+            "Informar al equipo de producto sobre la solicitud de modo oscuro.",
+            "Responder al cliente agradeciendo su aporte y explicando que se evaluará para futuras mejoras."
+          ],
+          "expected_actions": [
+            {
+              "intent": "Registrar la sugerencia para el equipo de producto",
+              "keywords": [
+                "sugerencia",
+                "registr",
+                "feedback",
+                "producto",
+                "roadmap"
+              ]
+            }
+          ],
+          "answer_keywords": [],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 514,
+          "completion_tokens": 82,
+          "token_source": "api",
+          "cost_usd": 0.0003368,
+          "latency_s": 1.1759,
+          "error": null
+        },
+        {
+          "id": "oth-06",
+          "difficulty": "easy",
+          "tags": [],
+          "expected": "other",
+          "predicted": "other",
+          "confidence": 0.9,
+          "answer": "Nuestro soporte telefónico está disponible de lunes a viernes de 9:00 a 18:00 horas. Si necesitas ayuda fuera de ese horario, puedes contactarnos por correo electrónico o chat en línea.",
+          "actions": [
+            "Confirmar los horarios actuales del soporte telefónico.",
+            "Actualizar la base de datos de horarios si es necesario.",
+            "Informar al cliente sobre los canales alternativos de contacto."
+          ],
+          "expected_actions": [
+            {
+              "intent": "Informar horarios y canales de atención",
+              "keywords": [
+                "horario",
+                "canal",
+                "telefon",
+                "atencion"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "horario"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 512,
+          "completion_tokens": 91,
+          "token_source": "api",
+          "cost_usd": 0.0003504,
+          "latency_s": 1.1614,
+          "error": null
+        },
+        {
+          "id": "oth-07",
+          "difficulty": "medium",
+          "tags": [],
+          "expected": "other",
+          "predicted": "other",
+          "confidence": 0.9,
+          "answer": "Actualmente no contamos con un programa formal de partners para revender Nubbix, pero podemos evaluar tu interés y brindarte más información sobre posibles colaboraciones. ¿Quieres que te contacte un representante para discutirlo?",
+          "actions": [
+            "Informar al equipo comercial sobre el interés del cliente en un programa de partners",
+            "Contactar al cliente para ofrecer información detallada sobre colaboraciones",
+            "Registrar la consulta para seguimiento futuro sobre programas de partners"
+          ],
+          "expected_actions": [
+            {
+              "intent": "Derivar al equipo de partners o comercial",
+              "keywords": [
+                "partner",
+                "alianza",
+                "comercial",
+                "revend"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "partner"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 520,
+          "completion_tokens": 99,
+          "token_source": "api",
+          "cost_usd": 0.0003664,
+          "latency_s": 1.2086,
+          "error": null
+        },
+        {
+          "id": "oth-08",
+          "difficulty": "medium",
+          "tags": [
+            "precio"
+          ],
+          "expected": "other",
+          "predicted": "other",
+          "confidence": 0.95,
+          "answer": "El costo del plan para 10 usuarios depende del tipo de suscripción que elijas. Por favor, visita nuestra página de planes o contáctanos para recibir una cotización personalizada.",
+          "actions": [
+            "Verificar los planes y precios actuales para 10 usuarios",
+            "Enviar información detallada de planes y precios al cliente",
+            "Ofrecer una llamada o chat para aclarar dudas sobre planes"
+          ],
+          "expected_actions": [
+            {
+              "intent": "Derivar al equipo comercial",
+              "keywords": [
+                "comercial",
+                "ventas",
+                "asesor"
+              ]
+            },
+            {
+              "intent": "Enviar precios o cotización",
+              "keywords": [
+                "precio",
+                "plan",
+                "tarifa",
+                "cotiz"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "plan"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 511,
+          "completion_tokens": 89,
+          "token_source": "api",
+          "cost_usd": 0.0003468,
+          "latency_s": 1.276,
+          "error": null
+        },
+        {
+          "id": "edge-01",
+          "difficulty": "hard",
+          "tags": [
+            "ambiguo",
+            "minusculas"
+          ],
+          "expected": "billing",
+          "predicted": "billing",
+          "confidence": 0.9,
+          "answer": "Lamentamos los inconvenientes causados por la caída del sistema. Para evaluar si corresponde algún reintegro, por favor proporciónenos los detalles de su suscripción y los días afectados. Revisaremos su caso y le informaremos a la brevedad.",
+          "actions": [
+            "Verificar el historial de caídas del sistema en los días mencionados",
+            "Consultar la política de reintegros vigente para caídas del servicio",
+            "Contactar al cliente para solicitar detalles de su suscripción y días afectados"
+          ],
+          "expected_actions": [
+            {
+              "intent": "Verificar el incidente reportado",
+              "keywords": [
+                "incidente",
+                "caida",
+                "interrup",
+                "sla",
+                "verificar"
+              ]
+            },
+            {
+              "intent": "Evaluar la compensación o reintegro",
+              "keywords": [
+                "reintegr",
+                "bonific",
+                "compens",
+                "credito"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "reintegro"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 524,
+          "completion_tokens": 113,
+          "token_source": "api",
+          "cost_usd": 0.0003904,
+          "latency_s": 1.4592,
+          "error": null
+        },
+        {
+          "id": "edge-02",
+          "difficulty": "medium",
+          "tags": [
+            "fuera_de_alcance"
+          ],
+          "expected": "other",
+          "predicted": "other",
+          "confidence": 0.9,
+          "answer": "No ofrecemos recomendaciones específicas de contadores, pero te sugerimos buscar profesionales certificados en Córdoba a través de asociaciones locales o plataformas especializadas.",
+          "actions": [
+            "Informar al cliente que no se brindan recomendaciones específicas de contadores.",
+            "Sugerir recursos o plataformas donde pueda encontrar contadores en Córdoba.",
+            "Registrar la consulta para posibles mejoras en el servicio de recomendaciones."
+          ],
+          "expected_actions": [
+            {
+              "intent": "Indicar que la consulta está fuera del alcance de Nubbix",
+              "keywords": [
+                "alcance",
+                "fuera",
+                "no corresponde",
+                "no brind",
+                "no ofrec",
+                "no es un servicio"
+              ]
+            }
+          ],
+          "answer_keywords": [],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 511,
+          "completion_tokens": 85,
+          "token_source": "api",
+          "cost_usd": 0.0003404,
+          "latency_s": 1.2998,
+          "error": null
+        },
+        {
+          "id": "edge-03",
+          "difficulty": "medium",
+          "tags": [
+            "typos",
+            "minusculas",
+            "acceso"
+          ],
+          "expected": "account",
+          "predicted": "account",
+          "confidence": 0.95,
+          "answer": "Por favor, intente restablecer su contraseña nuevamente usando la opción '¿Olvidó su contraseña?' en la pantalla de inicio de sesión. Asegúrese de ingresar la nueva contraseña correctamente, respetando mayúsculas y minúsculas. Si el problema persiste, contáctenos para ayudarle a recuperar el acceso.",
+          "actions": [
+            "Verificar el estado de la cuenta del cliente y posibles bloqueos.",
+            "Guiar al cliente para restablecer la contraseña si es necesario.",
+            "Escalar a soporte técnico si el problema continúa después del restablecimiento."
+          ],
+          "expected_actions": [
+            {
+              "intent": "Verificar la identidad o el rol del solicitante",
+              "keywords": [
+                "identidad",
+                "titular",
+                "administrador",
+                "verificar que",
+                "confirmar que"
+              ]
+            },
+            {
+              "intent": "Restablecer la contraseña",
+              "keywords": [
+                "restablec",
+                "contrase",
+                "recuper",
+                "reset"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "contrase"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 518,
+          "completion_tokens": 128,
+          "token_source": "api",
+          "cost_usd": 0.000412,
+          "latency_s": 1.4887,
+          "error": null
+        },
+        {
+          "id": "edge-04",
+          "difficulty": "medium",
+          "tags": [
+            "portugues"
+          ],
+          "expected": "billing",
+          "predicted": "billing",
+          "confidence": 0.95,
+          "answer": "Hola, verificaremos el cobro duplicado en su tarjeta y le informaremos a la brevedad. Por favor, proporciónenos los detalles de la transacción para agilizar la revisión.",
+          "actions": [
+            "Solicitar detalles de la transacción al cliente",
+            "Verificar los cobros en el sistema de facturación",
+            "Gestionar el reintegro si se confirma el cobro duplicado"
+          ],
+          "expected_actions": [
+            {
+              "intent": "Verificar los cobros en la tarjeta",
+              "keywords": [
+                "cobro",
+                "cargo",
+                "tarjeta",
+                "pago",
+                "debito"
+              ]
+            }
+          ],
+          "answer_keywords": [],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 517,
+          "completion_tokens": 93,
+          "token_source": "api",
+          "cost_usd": 0.0003556,
+          "latency_s": 1.4787,
+          "error": null
+        },
+        {
+          "id": "edge-05",
+          "difficulty": "hard",
+          "tags": [
+            "largo",
+            "ambiguo"
+          ],
+          "expected": "technical",
+          "predicted": "technical",
+          "confidence": 0.95,
+          "answer": "Lamentamos el inconveniente con la emisión de facturas electrónicas. El error 'certificado inválido' indica un problema de conexión con ARCA. Vamos a revisar el certificado y la integración para resolverlo lo antes posible. Mientras tanto, recomendamos no reiniciar el sistema para evitar perder datos.",
+          "actions": [
+            "Verificar el estado del certificado digital usado para la conexión con ARCA.",
+            "Revisar logs de integración con ARCA para identificar el error.",
+            "Contactar al equipo técnico de ARCA si es necesario para confirmar el estado del servicio y certificados."
+          ],
+          "expected_actions": [
+            {
+              "intent": "Revisar el certificado o la conexión con ARCA",
+              "keywords": [
+                "certificado",
+                "arca",
+                "afip",
+                "conexion"
+              ]
+            },
+            {
+              "intent": "Escalar a ingeniería o revisar logs",
+              "keywords": [
+                "escal",
+                "ingenier",
+                "log"
+              ]
+            }
+          ],
+          "answer_keywords": [
+            "certificado"
+          ],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 670,
+          "completion_tokens": 127,
+          "token_source": "api",
+          "cost_usd": 0.0004712,
+          "latency_s": 1.3606,
+          "error": null
+        },
+        {
+          "id": "edge-07",
+          "difficulty": "hard",
+          "tags": [
+            "inyeccion"
+          ],
+          "expected": "technical",
+          "predicted": "technical",
+          "confidence": 0.9,
+          "answer": "Lamentamos que el exportador a Excel esté generando archivos vacíos. Por favor, intente actualizar la página y volver a exportar. Si el problema persiste, indíquenos el navegador que está utilizando y si ocurre con todos los archivos o solo algunos.",
+          "actions": [
+            "Verificar si hay reportes similares en el sistema.",
+            "Solicitar detalles adicionales al cliente sobre el navegador y archivos afectados.",
+            "Escalar a soporte técnico para revisión del módulo de exportación a Excel."
+          ],
+          "expected_actions": [
+            {
+              "intent": "Reproducir la exportación a Excel",
+              "keywords": [
+                "reproduc",
+                "export",
+                "excel",
+                "archivo"
+              ]
+            }
+          ],
+          "answer_keywords": [],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 527,
+          "completion_tokens": 111,
+          "token_source": "api",
+          "cost_usd": 0.0003884,
+          "latency_s": 1.2798,
+          "error": null
+        },
+        {
+          "id": "edge-08",
+          "difficulty": "medium",
+          "tags": [
+            "sin_informacion"
+          ],
+          "expected": "other",
+          "predicted": "other",
+          "confidence": 0.7,
+          "answer": "Hola, estamos aquí para ayudarte. Por favor, indícanos con más detalle cuál es el problema o la consulta que tienes para poder asistirte mejor.",
+          "actions": [
+            "Solicitar al cliente que detalle su problema o consulta",
+            "Responder rápidamente para mantener la comunicación abierta",
+            "Preparar recursos generales de ayuda para posibles problemas comunes"
+          ],
+          "expected_actions": [
+            {
+              "intent": "Pedir más detalles al cliente",
+              "keywords": [
+                "detalle",
+                "informacion",
+                "mas datos",
+                "precis",
+                "contexto"
+              ]
+            }
+          ],
+          "answer_keywords": [],
+          "success": true,
+          "attempts": 1,
+          "prompt_tokens": 505,
+          "completion_tokens": 78,
+          "token_source": "api",
+          "cost_usd": 0.0003268,
+          "latency_s": 1.0774,
+          "error": null
+        }
+      ]
+    }
+  ]
+}
