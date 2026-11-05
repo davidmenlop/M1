@@ -175,4 +175,4 @@ El ganador fue el mismo, Haiku 5.5 con v4, confirmado en el holdout de 8 casos. 
 
 ---
 
-**Anterior:** [Capítulo 7 — Suite de evals](07-fase-6-evals.md) · **Siguiente:** Capítulo 9 — Guardrails (Fase 8, pendiente)
+**Anterior:** [Capítulo 7 — Suite de evals](07-fase-6-evals.md) · **Siguiente:** [Capítulo 9 — Guardrails](09-fase-8-guardrails.md)

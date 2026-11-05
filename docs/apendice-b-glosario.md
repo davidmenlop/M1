@@ -82,6 +82,12 @@
 
 **Moderación.** Clasificación de contenido dañino (violencia, datos personales, etc.) antes o después del LLM.
 
+**Saneamiento (sanitize).** Modificar la entrada para quitarle lo peligroso y seguir procesándola, en vez de bloquearla. Acá: ocultar datos sensibles, neutralizar el delimitador y eliminar las oraciones con inyección.
+
+**Normalización (fold).** Forma canónica de un texto usada solo para buscar patrones: minúsculas, sin tildes ni caracteres invisibles, leetspeak traducido. Hace que `1GN0RÁ` y `ignora` coincidan.
+
+**Shingle.** Secuencia de n palabras consecutivas. Si una respuesta comparte un shingle de 8 palabras con las instrucciones del prompt, probablemente las está copiando (fuga).
+
 **Falso positivo.** Caso legítimo bloqueado por un guardrail. Se mide sobre el dataset benigno: un guardrail que bloquea todo no sirve.
 
 ## Operación y métricas

@@ -5,7 +5,7 @@
 > De un repositorio vacío a un servicio multi-proveedor, con contrato validado,
 > evals ejecutables, guardrails y métricas auditables.
 
-**Estado del manual:** v0.9 — capítulos 0 a 8 completos.
+**Estado del manual:** v0.10 — capítulos 0 a 9 completos.
 **Última actualización:** 2026-11-04.
 **Fuente de verdad:** el código del repositorio. Si el manual y el código difieren, gana el código; el manual se corrige en el mismo commit.
 
@@ -44,7 +44,7 @@ La regla es simple: **ninguna decisión técnica se sostiene con intuición**. S
 | [6 — Dataset](06-fase-5-dataset.md) | Fase 5 | 40 casos, guía de etiquetado, revisión humana, leakage | ✅ |
 | [7 — Suite de evals](07-fase-6-evals.md) | Fase 6 | Runner, métricas, umbrales, resultados trazables | ✅ |
 | [8 — Iteración empírica](08-fase-7-iteracion.md) | Fase 7 | Prompt v4, comparativa prompts × modelos, elección por script, holdout | ✅ |
-| 9 — Guardrails | Fase 8 | Entrada, salida y medición de su efecto | ⏳ |
+| [9 — Guardrails](09-fase-8-guardrails.md) | Fase 8 | Entrada, salida, capas y medición de su efecto | ✅ |
 | 10 — Suite adversarial | Fase 9 | 10 ataques, mitigación y tasa de bloqueo | ⏳ |
 | 11 — Extras | Fase 10 | Caché MD5 y/o FastAPI, comparativa de modelos | ⏳ |
 | 12 — Cierre | Fase 11 | README final, clon limpio, entrega | ⏳ |
@@ -73,12 +73,12 @@ El manual es Markdown plano, sin dependencias. Si querés un PDF o un `.docx`:
 ```bash
 # PDF con tabla de contenidos
 pandoc docs/00-introduccion.md docs/01-fase-0-configuracion.md docs/02-fase-1-contrato.md \
-  docs/03-fase-2-cli-y-mock.md docs/04-fase-3-multi-proveedor.md docs/05-fase-4-prompts.md docs/06-fase-5-dataset.md docs/07-fase-6-evals.md docs/08-fase-7-iteracion.md docs/apendice-a-decisiones.md docs/apendice-b-glosario.md \
+  docs/03-fase-2-cli-y-mock.md docs/04-fase-3-multi-proveedor.md docs/05-fase-4-prompts.md docs/06-fase-5-dataset.md docs/07-fase-6-evals.md docs/08-fase-7-iteracion.md docs/09-fase-8-guardrails.md docs/apendice-a-decisiones.md docs/apendice-b-glosario.md \
   -o manual.pdf --toc --number-sections
 
 # DOCX
 pandoc docs/00-introduccion.md docs/01-fase-0-configuracion.md docs/02-fase-1-contrato.md \
-  docs/03-fase-2-cli-y-mock.md docs/04-fase-3-multi-proveedor.md docs/05-fase-4-prompts.md docs/06-fase-5-dataset.md docs/07-fase-6-evals.md docs/08-fase-7-iteracion.md \
+  docs/03-fase-2-cli-y-mock.md docs/04-fase-3-multi-proveedor.md docs/05-fase-4-prompts.md docs/06-fase-5-dataset.md docs/07-fase-6-evals.md docs/08-fase-7-iteracion.md docs/09-fase-8-guardrails.md \
   -o manual.docx --toc
 ```
 
@@ -93,6 +93,7 @@ pandoc docs/00-introduccion.md docs/01-fase-0-configuracion.md docs/02-fase-1-co
 | 0.1 | 2026-10-22 | Capítulos 0–2, apéndices A y B |
 | 0.2 | 2026-10-27 | Capítulo 3 (Fase 2): CLI, mock, pipeline, métricas. ADR-012 a ADR-014 |
 | 0.3 | 2026-10-28 | Proveedor Anthropic verificado con llamada real. Temperatura opcional por modelo. ADR-015 a ADR-017 |
+| 0.10 | 2026-11-05 | Capítulo 9 (Fase 8): guardrails de entrada y salida, medición offline y con el ganador. ADR-030 y ADR-031 |
 | 0.9 | 2026-11-05 | Capítulo 8, ronda 2: `oth-01` corregido, holdout de 14 casos, comparativa sin Haiku 4.5. ADR-029 |
 | 0.8 | 2026-11-04 | Capítulo 8 (Fase 7): prompt v4, comparativa de 12 combinaciones, `select.py`, holdout. ADR-027 y ADR-028 |
 | 0.7 | 2026-11-04 | Capítulo 7 (Fase 6): runner de evals, primera corrida real. Validación humana del dataset. ADR-026 |

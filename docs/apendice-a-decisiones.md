@@ -257,6 +257,24 @@
 - **Alternativas:** dejar el holdout como estaba (la confirmación no probaba nada); mover casos de dev a holdout (cambia la base de la selección); seguir con Haiku 4.5 (unos USD 0.80 más por ronda, para un modelo que no ganó).
 - **Consecuencias:** cambia el sha256 del dataset y `select.py` descarta toda la ronda 1. La ronda 2 cuesta USD 0.28 y elige lo mismo. Los casos nuevos se escribieron conociendo v4, pero no se corrieron hasta después de la validación humana; el diagnóstico con v3 (falla 3 de 6) muestra que exigen las reglas. Para usar Haiku 4.5 de nuevo hace falta revisar esta decisión.
 
+## ADR-030 — Guardrails que sanean en vez de bloquear, y que nunca cambian la categoría
+
+- **Fecha:** 2026-11-05
+- **Estado:** aceptada
+- **Contexto:** la consigna pide un guardrail de entrada y uno de salida. `edge-07` mezcla un pedido legítimo con una inyección, y la guía de etiquetado dice que la etiqueta es la del pedido. Un guardrail que bloquea todo mensaje sospechoso pierde esa clasificación; uno que solo marca deja pasar la inyección al modelo.
+- **Decisión:** la entrada **elimina las oraciones** con señales de inyección y sigue con el resto; **bloquea** (sin llamar al modelo) solo si no quedan al menos 3 palabras. Datos sensibles se ocultan, el delimitador se neutraliza, la moderación escala sin bloquear. La salida **reemplaza el texto** riesgoso (fuga, datos sensibles, afirmaciones no verificables) y agrega una acción de revisión, pero **nunca cambia la categoría**. Activos por defecto; `--no-guardrails` existe solo para medir.
+- **Alternativas:** bloquear todo mensaje con señales (pierde `edge-07`, y cualquier cliente que pegue texto raro queda sin clasificar); solo marcar (la inyección llega igual al modelo); que la salida reclasifique (el guardrail no tiene mejor información que el modelo).
+- **Consecuencias:** 0 falsos positivos en el dataset y sin cambio de calidad con el ganador. Si la inyección está en la misma oración que el pedido, se pierde el pedido y el caso puede terminar bloqueado: es una falla segura (lo ve una persona). Las respuestas reemplazadas pierden contenido útil a cambio de no prometer nada falso.
+
+## ADR-031 — Reglas locales en YAML, sin API de moderación ni LLM clasificador
+
+- **Fecha:** 2026-11-05
+- **Estado:** aceptada
+- **Contexto:** hay tres formas de detectar inyección y contenido dañino: reglas (regex), una API de moderación (por ejemplo la de OpenAI) o un segundo modelo que clasifique la consulta.
+- **Decisión:** reglas declarativas en `config/guardrails.yaml`, aplicadas sobre texto normalizado. Su sha256 queda en cada resultado de evals.
+- **Alternativas:** API de moderación (mejor cobertura de contenido dañino, pero no detecta inyección, agrega una dependencia de red y exige la clave de OpenAI aunque se use Anthropic; rompe el modo `mock` sin red); LLM clasificador (detecta paráfrasis, pero duplica costo y latencia, es otro modelo a evaluar y a su vez es atacable).
+- **Consecuencias:** costo cero, deterministas, auditables y testeables offline (0.3 ms por consulta). No detectan paráfrasis: la Fase 9 mide cuánto se escapa. Si la tasa de bloqueo resulta baja, un LLM clasificador es la siguiente capa a evaluar, con su costo medido.
+
 ## ADR-011 — Rama `master`
 
 - **Fecha:** 2026-10-22
