@@ -27,7 +27,7 @@ DIFFICULTIES = ("easy", "medium", "hard")
 STATUSES = ("draft", "validated", "disputed")
 ID_PATTERN = re.compile(r"^(bil|tec|acc|oth|edge)-\d{2}$")
 
-EXPECTED_SPLIT = {"dev": 32, "holdout": 8}
+EXPECTED_SPLIT = {"dev": 32, "holdout": 14}
 MIN_PER_CATEGORY = 8
 LEAKAGE_THRESHOLD = 0.5      # Jaccard de tokens contra ejemplos few-shot
 DUPLICATE_THRESHOLD = 0.8    # Jaccard entre dos casos del dataset
