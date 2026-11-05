@@ -5,7 +5,7 @@ con `{answer, confidence, category, actions}`, con métricas de tokens, latencia
 
 > **Estado:** en construcción. Fases 0–7 completas: contrato, CLI, pipeline con
 > reintento y fallback, métricas, proveedores OpenAI y Anthropic, prompts v1–v4,
-> dataset de 40 casos validado por una persona, suite de evals y comparativa
+> dataset de 46 casos validado por una persona, suite de evals y comparativa
 > empírica (gana Haiku 5.5 con v4). Faltan los guardrails y la suite adversarial.
 >
 > Este README se completa en el Capítulo 12 del manual. Por ahora, el documento
@@ -98,34 +98,33 @@ python evals/runner.py --compare evals/results/*.json      # tabla comparativa
 python evals/select.py evals/results/*.json                # aplica el criterio de selección
 ```
 
-Solo se evalúan casos validados por una persona (`evals/dataset.jsonl`, 32 dev / 8 holdout).
+Solo se evalúan casos validados por una persona (`evals/dataset.jsonl`, 32 dev / 14 holdout).
 Cada corrida guarda en `evals/results/` las métricas, cada caso y los hashes del prompt
 y del dataset. Resultados actuales:
 
 | corrida | proveedor / modelo | prompt | split | casos | schema | retry | accuracy | macro-F1 | recall mín | action | Brier | USD/req | p95 s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | 20261104-175711 | mock / mock-1 | v1 | dev | 32×1 | 100% | 0% | 59% | 0.567 | 25% | 0.406 | 0.219 | 0.00000 | 0.000 |
-| 20261104-175754 | openai / gpt-4.1-mini | v1 | dev | 32×1 | 100% | 0% | 91% | 0.908 | 78% | 0.859 | 0.089 | 0.00037 | 1.863 |
-| 20261104-233409 | openai / gpt-4.1-mini | v2 | dev | 32×1 | 100% | 0% | 94% | 0.938 | 78% | 0.984 | 0.078 | 0.00069 | 1.800 |
-| 20261104-233458 | openai / gpt-4.1-mini | v3 | dev | 32×1 | 100% | 0% | 94% | 0.938 | 78% | 0.969 | 0.076 | 0.00096 | 1.817 |
-| 20261104-233546 | openai / gpt-4.1-mini | v4 | dev | 32×1 | 100% | 0% | 100% | 1.000 | 100% | 0.969 | 0.020 | 0.00105 | 1.748 |
-| 20261104-233906 | anthropic / claude-haiku-5-5 | v1 | dev | 32×3 | 100% ±0% | 1% ±2% | 92% ±2% | 0.918 ±0.017 | 78% ±0% | 0.943 ±0.009 | 0.107 ±0.000 | 0.00022 ±0.00000 | 2.890 ±0.340 |
-| 20261104-234136 | anthropic / claude-haiku-5-5 | v2 | dev | 32×3 | 100% ±0% | 0% ±0% | 94% ±0% | 0.938 ±0.000 | 78% ±0% | 0.969 ±0.016 | 0.090 ±0.006 | 0.00032 ±0.00000 | 2.204 ±0.394 |
-| 20261104-234443 | anthropic / claude-haiku-5-5 | v3 | dev | 32×3 | 100% ±0% | 0% ±0% | 94% ±0% | 0.938 ±0.000 | 78% ±0% | 0.943 ±0.018 | 0.082 ±0.013 | 0.00046 ±0.00001 | 2.700 ±0.249 |
-| 20261104-234752 | anthropic / claude-haiku-5-5 | v4 | dev | 32×3 | 100% ±0% | 0% ±0% | 100% ±0% | 1.000 ±0.000 | 100% ±0% | 0.969 ±0.016 | 0.044 ±0.009 | 0.00050 ±0.00000 | 2.795 ±0.062 |
-| 20261104-235214 | anthropic / claude-haiku-4-5 | v1 | dev | 32×3 | 100% ±0% | 0% ±0% | 97% ±0% | 0.969 ±0.000 | 89% ±0% | 0.885 ±0.009 | 0.053 ±0.001 | 0.00170 ±0.00002 | 3.194 ±0.106 |
-| 20261104-235523 | anthropic / claude-haiku-4-5 | v2 | dev | 32×3 | 100% ±0% | 0% ±0% | 95% ±2% | 0.948 ±0.018 | 81% ±6% | 0.964 ±0.009 | 0.078 ±0.015 | 0.00243 ±0.00001 | 2.464 ±0.012 |
-| 20261104-235933 | anthropic / claude-haiku-4-5 | v3 | dev | 32×3 | 100% ±0% | 0% ±0% | 94% ±0% | 0.938 ±0.000 | 78% ±0% | 0.938 ±0.016 | 0.078 ±0.003 | 0.00343 ±0.00000 | 3.139 ±0.099 |
-| 20261105-000348 | anthropic / claude-haiku-4-5 | v4 | dev | 32×3 | 100% ±0% | 0% ±0% | 100% ±0% | 1.000 ±0.000 | 100% ±0% | 0.917 ±0.036 | 0.031 ±0.001 | 0.00372 ±0.00001 | 3.227 ±0.269 |
-| 20261105-000447 | anthropic / claude-haiku-5-5 | v4 | holdout | 8×3 | 100% ±0% | 0% ±0% | 100% ±0% | 1.000 ±0.000 | 100% ±0% | 0.896 ±0.036 | 0.012 ±0.001 | 0.00051 ±0.00000 | 2.416 ±0.176 |
+| 20261105-005611 | openai / gpt-4.1-mini | v1 | dev | 32×1 | 100% | 0% | 91% | 0.908 | 78% | 0.891 | 0.089 | 0.00037 | 1.816 |
+| 20261105-005657 | openai / gpt-4.1-mini | v2 | dev | 32×1 | 100% | 0% | 94% | 0.938 | 78% | 1.000 | 0.076 | 0.00069 | 1.892 |
+| 20261105-005747 | openai / gpt-4.1-mini | v3 | dev | 32×1 | 100% | 0% | 94% | 0.938 | 78% | 0.953 | 0.077 | 0.00096 | 1.712 |
+| 20261105-005835 | openai / gpt-4.1-mini | v4 | dev | 32×1 | 100% | 0% | 100% | 1.000 | 100% | 0.953 | 0.020 | 0.00105 | 1.805 |
+| 20261105-010215 | anthropic / claude-haiku-5-5 | v1 | dev | 32×3 | 100% ±0% | 1% ±2% | 91% ±0% | 0.908 ±0.000 | 78% ±0% | 0.911 ±0.024 | 0.110 ±0.005 | 0.00022 ±0.00001 | 3.609 ±1.333 |
+| 20261105-010449 | anthropic / claude-haiku-5-5 | v2 | dev | 32×3 | 100% ±0% | 0% ±0% | 94% ±0% | 0.938 ±0.000 | 78% ±0% | 0.938 ±0.016 | 0.088 ±0.001 | 0.00033 ±0.00000 | 2.449 ±0.109 |
+| 20261105-010749 | anthropic / claude-haiku-5-5 | v3 | dev | 32×3 | 100% ±0% | 0% ±0% | 94% ±0% | 0.938 ±0.000 | 78% ±0% | 0.958 ±0.009 | 0.101 ±0.002 | 0.00046 ±0.00000 | 2.551 ±0.232 |
+| 20261105-011050 | anthropic / claude-haiku-5-5 | v4 | dev | 32×3 | 100% ±0% | 0% ±0% | 100% ±0% | 1.000 ±0.000 | 100% ±0% | 0.953 ±0.016 | 0.049 ±0.001 | 0.00050 ±0.00001 | 2.589 ±0.080 |
+| 20261105-011223 | anthropic / claude-haiku-5-5 | v4 | holdout | 14×3 | 100% ±0% | 0% ±0% | 100% ±0% | 1.000 ±0.000 | 100% ±0% | 0.929 ±0.000 | 0.014 ±0.001 | 0.00051 ±0.00000 | 2.589 ±0.039 |
+| 20261105-011356 | anthropic / claude-haiku-5-5 | v3 | holdout | 14×3 | 100% ±0% | 0% ±0% | 79% ±0% | 0.819 ±0.000 | 60% ±0% | 0.929 ±0.000 | 0.163 ±0.003 | 0.00047 ±0.00000 | 2.616 ±0.147 |
 
 El mock es la línea base de un clasificador por palabras clave. Anthropic promedia 3 corridas (±desvío).
 
 **Combinación elegida: Haiku 5.5 con v4** (criterio de ADR-022, aplicado por
 `python evals/select.py evals/results/*.json`). Empata con `gpt-4.1-mini` + v4 en
-macro-F1 y action score, y cuesta la mitad. Confirmado en holdout (8/8). Salvedad: v4 se
-escribió después de ver dev y el holdout no tiene casos de sus reglas nuevas
-([Capítulo 8](docs/08-fase-7-iteracion.md)).
+macro-F1 y action score, y cuesta la mitad. Confirmado en holdout: 14/14, incluidos 6 casos
+de sus reglas nuevas que v3 falla en la mitad (diagnóstico, no selección). v4 se escribió
+después de ver dev, por eso su resultado en dev es optimista
+([Capítulo 8](docs/08-fase-7-iteracion.md)). La tabla muestra la ronda 2; la ronda 1, que
+incluyó Haiku 4.5 y usó el dataset anterior, está en el mismo capítulo.
 
 ```bash
 python -m src.main --provider anthropic --model haiku-5-5 --query "..."   # prompt v4 por defecto
@@ -140,7 +139,7 @@ python -m src.main --provider anthropic --model haiku-5-5 --query "..."   # prom
 | 2 | CLI + `MockProvider` + pipeline + métricas | ✅ |
 | 3 | Multi-proveedor y retry | ✅ |
 | 4 | Prompts versionados | ✅ |
-| 5 | Dataset de evaluación | ✅ 40 casos validados por una persona |
+| 5 | Dataset de evaluación | ✅ 46 casos validados por una persona |
 | 6 | Suite de evals | ✅ |
 | 7 | Comparativa empírica | ✅ Haiku 5.5 + v4 |
 | 8 | Guardrails | ⏳ |

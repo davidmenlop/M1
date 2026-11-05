@@ -244,9 +244,18 @@
 - **Fecha:** 2026-11-04
 - **Estado:** aceptada
 - **Contexto:** la Fase 7 corrió 4 prompts × 3 modelos en dev y aplicó el criterio de ADR-022 con `evals/select.py`.
-- **Decisión:** gana `claude-haiku-5-5` con v4: macro-F1 1.000 (3 corridas), empatado con `gpt-4.1-mini` + v4 en F1 y action score, y a la mitad de costo (USD 0.0005 por request). Confirmado en holdout (8/8 en 3 corridas). `DEFAULT_PROMPT_VERSION` pasa a v4. El proveedor predeterminado sigue siendo `mock` (ADR-012): usar el ganador exige `--provider anthropic --model haiku-5-5`.
+- **Decisión:** gana `claude-haiku-5-5` con v4: macro-F1 1.000 (3 corridas), empatado con `gpt-4.1-mini` + v4 en F1 y action score, y a la mitad de costo (USD 0.0005 por request). Confirmado en holdout: 8/8 en la ronda 1 y 14/14 en la ronda 2, que incluye casos de las reglas nuevas (ADR-029). `DEFAULT_PROMPT_VERSION` pasa a v4. El proveedor predeterminado sigue siendo `mock` (ADR-012): usar el ganador exige `--provider anthropic --model haiku-5-5`.
 - **Alternativas:** `gpt-4.1-mini` + v4 (mismo resultado, el doble de costo, menor latencia: 1.75 s vs 2.79 s de p95; sería la elección si la latencia importara más que el costo, pero el criterio fijado no lo dice); Haiku 4.5 + v2 (el ganador sin v4; casi 5 veces más caro); cambiar la clave `default` de Anthropic a Haiku 5.5 (rompería el significado de las corridas ya guardadas con `model_key: default`).
-- **Consecuencias:** el resultado en dev es optimista (ADR-027) y el holdout no tiene casos que prueben las reglas nuevas, así que la confirmación es débil. Pendiente: casos nuevos de baja y email de facturas, escritos sin mirar los resultados. Con 0 errores en dev, la calibración de `confidence` no se puede evaluar.
+- **Consecuencias:** el resultado en dev es optimista (ADR-027). El holdout de la ronda 1 no probaba las reglas nuevas; el de la ronda 2 sí, y v3 falla 3 de esos 6 casos mientras v4 los acierta (ADR-029). Con 0 errores, la calibración de `confidence` no se puede evaluar.
+
+## ADR-029 — Holdout ampliado con casos de las reglas de v4; ronda 2 sin Haiku 4.5
+
+- **Fecha:** 2026-11-04
+- **Estado:** aceptada
+- **Contexto:** la ronda 1 de la Fase 7 dejó dos problemas. El holdout de 8 casos no tenía bajas de suscripción ni emails de facturas, así que no probaba las reglas de v4. Y `oth-01` esperaba "Informar planes o descuentos", que contradice la regla de v4 de no afirmar políticas comerciales. Además, Haiku 4.5 fue el 81 % del costo de la ronda (USD 1.08) y no ganó.
+- **Decisión:** (1) por decisión humana, `oth-01` espera solo "Derivar al equipo comercial"; (2) el asistente escribe 6 casos nuevos de holdout a partir de la guía de etiquetado, sin correrlos, incluidos contrastes (`bil-09`: baja + cobro → billing; `bil-10`: mail + CUIT → billing); una persona los valida antes de evaluar; (3) el holdout pasa de 8 a 14 casos; (4) la comparativa se repite completa solo con `gpt-4.1-mini` y Haiku 5.5: el usuario excluyó Haiku 4.5 por costo.
+- **Alternativas:** dejar el holdout como estaba (la confirmación no probaba nada); mover casos de dev a holdout (cambia la base de la selección); seguir con Haiku 4.5 (unos USD 0.80 más por ronda, para un modelo que no ganó).
+- **Consecuencias:** cambia el sha256 del dataset y `select.py` descarta toda la ronda 1. La ronda 2 cuesta USD 0.28 y elige lo mismo. Los casos nuevos se escribieron conociendo v4, pero no se corrieron hasta después de la validación humana; el diagnóstico con v3 (falla 3 de 6) muestra que exigen las reglas. Para usar Haiku 4.5 de nuevo hace falta revisar esta decisión.
 
 ## ADR-011 — Rama `master`
 

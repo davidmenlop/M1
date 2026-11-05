@@ -5,7 +5,7 @@
 > De un repositorio vacío a un servicio multi-proveedor, con contrato validado,
 > evals ejecutables, guardrails y métricas auditables.
 
-**Estado del manual:** v0.8 — capítulos 0 a 8 completos.
+**Estado del manual:** v0.9 — capítulos 0 a 8 completos.
 **Última actualización:** 2026-11-04.
 **Fuente de verdad:** el código del repositorio. Si el manual y el código difieren, gana el código; el manual se corrige en el mismo commit.
 
@@ -93,6 +93,7 @@ pandoc docs/00-introduccion.md docs/01-fase-0-configuracion.md docs/02-fase-1-co
 | 0.1 | 2026-10-22 | Capítulos 0–2, apéndices A y B |
 | 0.2 | 2026-10-27 | Capítulo 3 (Fase 2): CLI, mock, pipeline, métricas. ADR-012 a ADR-014 |
 | 0.3 | 2026-10-28 | Proveedor Anthropic verificado con llamada real. Temperatura opcional por modelo. ADR-015 a ADR-017 |
+| 0.9 | 2026-11-05 | Capítulo 8, ronda 2: `oth-01` corregido, holdout de 14 casos, comparativa sin Haiku 4.5. ADR-029 |
 | 0.8 | 2026-11-04 | Capítulo 8 (Fase 7): prompt v4, comparativa de 12 combinaciones, `select.py`, holdout. ADR-027 y ADR-028 |
 | 0.7 | 2026-11-04 | Capítulo 7 (Fase 6): runner de evals, primera corrida real. Validación humana del dataset. ADR-026 |
 | 0.6 | 2026-11-04 | Capítulo 6 (Fase 5): dataset, guía de etiquetado, revisión humana. ADR-023 a ADR-025 |

@@ -109,6 +109,8 @@ Acciones esperadas:   Ubicar y enviar la factura
 - `--all` vuelve a revisar todo; `--id acc-04` revisa un caso puntual.
 - Sin una terminal interactiva (por ejemplo, desde un pipe) se niega a correr con código 2. Se probó con una pseudo-terminal (pty) sobre una copia del dataset: aceptar, cambiar con nota, disputar y saltar quedaron guardados como se esperaba.
 
+> **Actualización (Fase 7, ADR-029):** el dataset pasó a 46 casos (32 dev / 14 holdout) con 6 casos nuevos de holdout para las reglas de baja y email, validados por la misma persona, y `oth-01` cambió su acción esperada a "Derivar al equipo comercial". Lo que sigue describe el dataset de 40 casos de esta fase.
+
 **Resultado de la revisión (2026-11-04):** 40/40 casos validados, con 95 % de acuerdo con el borrador. Se cambiaron dos casos de `billing` a `account`: `bil-03` (dar de baja la suscripción: *"es la finalización del servicio, la cuenta se daría de baja"*) y `bil-08` (email de facturas: *"deben actualizar la información de la cuenta"*). La guía de etiquetado se actualizó (reglas 3 y 4) para reflejar esas decisiones. **Consecuencia:** v2 y v3 ubican la cancelación en billing, así que contradicen la etiqueta humana en `bil-03`. Como los prompts son inmutables (ADR-020), se resuelve en la Fase 7.
 
 ## 7. Validación
