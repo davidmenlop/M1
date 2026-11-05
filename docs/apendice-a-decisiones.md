@@ -192,7 +192,7 @@
 - **Contexto:** la rúbrica exige elegir el prompt con datos y con un criterio fijado de antemano. Elegir después de ver los números invita a justificar el resultado preferido.
 - **Decisión:** requisitos mínimos (schema 100 %, `retry_rate` ≤ 10 %) → macro-F1 en dev → si la diferencia es < 0.03, action score → si sigue < 0.03, costo por request y latencia p95. Confirmación única en holdout (caída > 0.10 = sobreajuste reportado). Anthropic: promedio de 3 corridas. La resistencia a inyecciones se reporta aparte (Fase 9). Detalle en el Capítulo 5, §7.
 - **Alternativas:** accuracy como métrica principal (engañosa con clases desbalanceadas); un puntaje ponderado único (los pesos serían arbitrarios y se podrían ajustar a posteriori).
-- **Consecuencias:** el resultado de la Fase 7 queda determinado por los datos, incluso si gana el prompt más simple. El umbral de 0.03 refleja que con 32 casos un acierto mueve unos 3 puntos: diferencias menores son ruido.
+- **Consecuencias:** el resultado de la Fase 7 queda determinado por los datos, incluso si gana el prompt más simple. *Revisión (Fase 7):* la Fase 6 mostró que `temperature: 0` no hace a OpenAI determinista, así que comparar 1 corrida de OpenAI con el promedio de 3 de Anthropic es asimétrico. Se mantuvo por costo y queda documentado como limitación en el Capítulo 8. El umbral de 0.03 refleja que con 32 casos un acierto mueve unos 3 puntos: diferencias menores son ruido.
 
 ## ADR-023 — Acciones esperadas como intents con keywords
 

@@ -77,7 +77,9 @@ Las diferencias se redondean antes de compararlas con 0.03: sin eso, `0.96 - 0.9
 | 7 | openai / gpt-4.1-mini · v1 | 1 | 0.908 | 0.891 | 0.00037 | 1.82 | macro-F1 a 0.092 del mejor |
 | 8 | anthropic / claude-haiku-5-5 · v1 | 3 | 0.908 | 0.911 | 0.00022 | 3.61 | macro-F1 a 0.092 del mejor |
 
-Haiku 5.5 y `gpt-4.1-mini` con v4 empatan en macro-F1 y en action score; decide el costo. Con v2 y v3, los dos modelos fallan los mismos casos (`bil-03`, `bil-08`); con v1, además `oth-01` (OpenAI) o `tec-06` (Haiku 5.5).
+Haiku 5.5 y `gpt-4.1-mini` con v4 empatan en macro-F1 y en action score; decide el costo.
+
+**Limitación conocida: corridas asimétricas.** Anthropic promedia 3 corridas y OpenAI usa 1, porque ADR-022 supuso que `temperature: 0` hacía a OpenAI determinista. Los datos no lo sostienen: con el mismo prompt, el action score de OpenAI varió entre corridas (0.875 → 0.859 en la Fase 6; 0.984 → 1.000 con v2 entre rondas), mientras que Haiku 5.5 tuvo desvío 0.000 de macro-F1. La incertidumbre de OpenAI no está medida. Es poco probable que cambie el ganador, porque el desempate final es el costo (2.1×), que no depende de esa variación; pero es una suposición, no un dato. Igualar las corridas costaría unos USD 0.20 y se decidió no hacerlo. Con v2 y v3, los dos modelos fallan los mismos casos (`bil-03`, `bil-08`); con v1, además `oth-01` (OpenAI) o `tec-06` (Haiku 5.5).
 
 ### 5.2 Confirmación en holdout
 
