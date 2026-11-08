@@ -367,7 +367,7 @@ Cada una tiene contexto, alternativas y consecuencias en el
 ## Verificación
 
 ```bash
-for f in tests/test_*.py; do python "$f" | tail -1; done   # 155 tests, sin red
+for f in tests/test_*.py; do python "$f" 2>/dev/null | tail -1; done   # 155 tests, sin red
 python evals/validate_dataset.py --strict                  # estructura, balance y leakage
 python evals/guardrails_report.py                          # efecto de los guardrails, sin modelo
 python evals/adversarial.py --input-only                   # suite adversarial, solo entrada
