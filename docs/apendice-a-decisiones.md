@@ -275,6 +275,15 @@
 - **Alternativas:** API de moderación (mejor cobertura de contenido dañino, pero no detecta inyección, agrega una dependencia de red y exige la clave de OpenAI aunque se use Anthropic; rompe el modo `mock` sin red); LLM clasificador (detecta paráfrasis, pero duplica costo y latencia, es otro modelo a evaluar y a su vez es atacable).
 - **Consecuencias:** costo cero, deterministas, auditables y testeables offline (0.3 ms por consulta). No detectan paráfrasis: la Fase 9 mide cuánto se escapa. Si la tasa de bloqueo resulta baja, un LLM clasificador es la siguiente capa a evaluar, con su costo medido.
 
+## ADR-032 — Método de la suite adversarial: congelar antes de probar y evaluar la salida final
+
+- **Fecha:** 2026-11-08
+- **Estado:** aceptada
+- **Contexto:** los guardrails de la Fase 8 se escribieron probándolos con ataques del mismo autor que ahora escribe la suite. Medir con ataques ajustados a las reglas inflaría la tasa de bloqueo. Además, un ataque puede "pasar" un guardrail y fallar igual, porque el modelo lo rechaza; o puede no tener palabras de ataque y tener éxito (desvío de la clasificación).
+- **Decisión:** (1) la suite se commitea antes de correrla, ni siquiera offline; (2) cada ataque declara su criterio de éxito, evaluado sobre la salida final, que es lo que vería el cliente; (3) se miden tres configuraciones (sin defensas, solo prompt, completo) y dos modelos, con 3 corridas; (4) cada éxito se revisa a mano; (5) las correcciones posteriores se reportan aparte y se declaran optimistas; (6) los resultados se guardan en `evals/results/adversarial/` y se pueden reevaluar sin llamar al modelo.
+- **Alternativas:** medir solo la tasa de bloqueo del guardrail de entrada (no dice si el ataque tuvo éxito); un LLM como juez (otro modelo a validar, y atacable); un solo modelo (con Haiku 5.5 hay efecto techo).
+- **Consecuencias:** la primera medición fue mala para los guardrails (0 % de bloqueo) y encontró huecos reales que se corrigieron (40 %). La revisión manual encontró un error del evaluador que habría reportado una vulnerabilidad inexistente en el modelo ganador. Queda abierto `adv-08` (desvío de la clasificación con `gpt-4.1-mini`). Para una estimación sin sesgo después de las correcciones hacen falta ataques nuevos, escritos sin conocer las reglas v2.
+
 ## ADR-011 — Rama `master`
 
 - **Fecha:** 2026-10-22

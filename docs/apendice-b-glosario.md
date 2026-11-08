@@ -88,6 +88,10 @@
 
 **Shingle.** Secuencia de n palabras consecutivas. Si una respuesta comparte un shingle de 8 palabras con las instrucciones del prompt, probablemente las está copiando (fuga).
 
+**Homoglifo.** Carácter de otro alfabeto que se ve igual que uno latino (la `о` cirílica y la `o` latina). Sirve para evadir filtros por palabras; `fold` los traduce.
+
+**Efecto techo.** Cuando todas las configuraciones sacan el máximo, la medición no distingue entre ellas. En la Fase 9, Haiku 5.5 resiste los 10 ataques solo, así que hace falta un modelo más débil para ver qué aporta cada capa.
+
 **Falso positivo.** Caso legítimo bloqueado por un guardrail. Se mide sobre el dataset benigno: un guardrail que bloquea todo no sirve.
 
 ## Operación y métricas
