@@ -195,4 +195,4 @@ Sin Haiku 4.5.
 
 ---
 
-**Anterior:** [Capítulo 9 — Guardrails](09-fase-8-guardrails.md) · **Siguiente:** Capítulo 11 — Extras (Fase 10, pendiente)
+**Anterior:** [Capítulo 9 — Guardrails](09-fase-8-guardrails.md) · **Siguiente:** [Capítulo 11 — Extras](11-fase-10-extras.md)

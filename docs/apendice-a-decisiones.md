@@ -284,6 +284,15 @@
 - **Alternativas:** medir solo la tasa de bloqueo del guardrail de entrada (no dice si el ataque tuvo éxito); un LLM como juez (otro modelo a validar, y atacable); un solo modelo (con Haiku 5.5 hay efecto techo).
 - **Consecuencias:** la primera medición fue mala para los guardrails (0 % de bloqueo) y encontró huecos reales que se corrigieron (40 %). La revisión manual encontró un error del evaluador que habría reportado una vulnerabilidad inexistente en el modelo ganador. Queda abierto `adv-08` (desvío de la clasificación con `gpt-4.1-mini`). Para una estimación sin sesgo después de las correcciones hacen falta ataques nuevos, escritos sin conocer las reglas v2.
 
+## ADR-033 — Caché MD5 con todo lo que cambia la respuesta en la clave
+
+- **Fecha:** 2026-11-08
+- **Estado:** aceptada
+- **Contexto:** la consigna ofrece como extra una caché con hash MD5. Una caché de respuestas de un LLM tiene dos riesgos: servir una respuesta vieja después de cambiar el prompt, el modelo o las reglas, y guardar datos de clientes en disco.
+- **Decisión:** la clave es el MD5 de la consulta normalizada (NFKC, espacios, casefold), el proveedor, el modelo y sus parámetros, el MD5 del prompt renderizado y el sha256 de los guardrails. Se guarda la respuesta **después** del guardrail de salida y solo si es válida; nunca el fallback ni un bloqueo. La entrada se revisa antes de la caché. La consulta no se guarda: el archivo se llama por el hash. TTL de 7 días, escritura atómica, y cualquier error de caché se trata como un fallo de caché. Activa en la CLI; nunca en el runner de evals.
+- **Alternativas:** clave solo con la consulta (sirve respuestas viejas tras un cambio); normalización semántica o caché por embeddings (más aciertos, pero puede devolver la respuesta de otra pregunta); SHA-256 en vez de MD5 (no aporta: la clave no protege nada, y la consigna pide MD5); Redis o una base de datos (otra dependencia para un MVP; la guía pide evitarlo).
+- **Consecuencias:** cada cambio de prompt o de reglas vacía la caché en la práctica. La tasa de aciertos real depende del tráfico y no se puede medir con el dataset, que no tiene repeticiones. Si cambia la lógica del pipeline sin cambiar prompt ni reglas, hay que borrar `data/cache/` a mano.
+
 ## ADR-011 — Rama `master`
 
 - **Fecha:** 2026-10-22

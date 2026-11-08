@@ -6,8 +6,9 @@ con `{answer, confidence, category, actions}`, con métricas de tokens, latencia
 > **Estado:** en construcción. Fases 0–9 completas: contrato, CLI, pipeline con
 > reintento y fallback, métricas, proveedores OpenAI y Anthropic, prompts v1–v4,
 > dataset de 46 casos validado por una persona, suite de evals, comparativa
-> empírica (gana Haiku 5.5 con v4), guardrails de entrada y salida y suite
-> adversarial de 10 ataques. Faltan los extras y el cierre.
+> empírica (gana Haiku 5.5 con v4), guardrails de entrada y salida, suite
+> adversarial de 10 ataques y dos extras: caché MD5 y comparativa de modelos.
+> Falta el cierre.
 >
 > Este README se completa en el Capítulo 12 del manual. Por ahora, el documento
 > principal del proyecto es el libro de construcción.
@@ -29,6 +30,7 @@ trade-offs y el código explicado.
 - [Capítulo 8 — Iteración empírica](docs/08-fase-7-iteracion.md)
 - [Capítulo 9 — Guardrails](docs/09-fase-8-guardrails.md)
 - [Capítulo 10 — Suite adversarial](docs/10-fase-9-adversarial.md)
+- [Capítulo 11 — Extras](docs/11-fase-10-extras.md)
 - [Apéndice A — Decisiones (ADR)](docs/apendice-a-decisiones.md)
 - [Apéndice B — Glosario](docs/apendice-b-glosario.md)
 
@@ -69,6 +71,7 @@ python tests/test_eval_metrics.py         # 14/14 tests pasaron
 python tests/test_select.py               # 8/8 tests pasaron
 python tests/test_guardrails.py           # 25/25 tests pasaron
 python tests/test_adversarial.py          # 8/8 tests pasaron
+python tests/test_cache.py                # 9/9 tests pasaron
 python evals/validate_dataset.py --strict # dataset validado: estructura, balance y leakage
 python evals/guardrails_report.py         # efecto de los guardrails, sin llamar a ningún modelo
 python -m src.main --query "Me cobraron dos veces la suscripción"   # JSON validado (proveedor mock)
@@ -91,6 +94,9 @@ python -m src.main --query "..." --provider openai --prompt v2
 
 # Guardrails activos por defecto; --no-guardrails solo para medir su efecto
 python -m src.main --query "..." --no-guardrails
+
+# Caché MD5 activa por defecto (data/cache/); --no-cache para saltearla
+python -m src.main --query "..." --no-cache
 
 # La consulta también puede llegar por stdin
 echo "No puedo iniciar sesión" | python -m src.main --query -
@@ -224,6 +230,38 @@ python evals/adversarial.py --compare evals/results/adversarial/*.json
 - **Abierto:** `adv-08`. `gpt-4.1-mini` manda un problema técnico a facturación porque el
   ticket lo pide, con o sin defensas. Ninguna regex lo ve y la salida no reclasifica.
 
+## Extras
+
+### Caché MD5 ([Capítulo 11](docs/11-fase-10-extras.md))
+
+La clave es el MD5 de la consulta normalizada (espacios, mayúsculas, Unicode), el
+proveedor, el modelo y sus parámetros, el texto completo del prompt y las reglas de los
+guardrails: si cambia cualquiera, la entrada vieja no se usa. Solo se guardan respuestas
+válidas ya revisadas por el guardrail de salida; nunca el fallback, los bloqueos ni la
+consulta en texto plano. El runner de evals no la usa.
+
+| Haiku 5.5, misma consulta con otro formato | caché | latencia | costo |
+|---|---|---|---|
+| 1.ª vez | miss | 3,67 s | USD 0.00054 |
+| 2.ª vez | **hit** | **0,8 ms** | **USD 0** (registrado como `cache_saved_usd`) |
+
+### Comparativa de modelos
+
+Dev (32 casos), datos de las Fases 7 y 9:
+
+| | Haiku 5.5 (elegido) | gpt-4.1-mini | Haiku 4.5 |
+|---|---|---|---|
+| macro-F1 con v4 | 1.000 | 1.000 | 1.000 |
+| macro-F1 con v1 (zero-shot) | 0.908 | 0.908 | **0.969** |
+| USD por 1.000 tickets (v4) | **0.50** | 1.05 | 3.72 |
+| latencia p95 (v4) | 2,6 s | **1,8 s** | 3,2 s |
+| Brier (v4) | 0.049 | **0.020** | 0.031 |
+| defensa adversarial | **100 %** | 90 % | no medida (costo) |
+
+Con un buen prompt los tres clasifican igual; Haiku 4.5 solo gana sin ayuda del prompt, a
+7 veces el costo. Haiku 5.5 es el más barato y el único que resistió los 10 ataques;
+`gpt-4.1-mini` es el más rápido y el mejor calibrado.
+
 ## Estado por fase
 
 | Fase | Alcance | Estado |
@@ -238,5 +276,5 @@ python evals/adversarial.py --compare evals/results/adversarial/*.json
 | 7 | Comparativa empírica | ✅ Haiku 5.5 + v4 |
 | 8 | Guardrails | ✅ entrada + salida, 0 falsos positivos |
 | 9 | Suite adversarial | ✅ 10 ataques; 100 % de defensa con el ganador |
-| 10 | Extras | ⏳ |
+| 10 | Extras | ✅ caché MD5 + comparativa de modelos |
 | 11 | Cierre y entrega | ⏳ |
