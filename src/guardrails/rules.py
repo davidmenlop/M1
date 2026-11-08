@@ -18,6 +18,13 @@ _INVISIBLE = re.compile(r"[​-‏⁠-⁤﻿­]")
 _CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 _LEET = str.maketrans({"0": "o", "1": "i", "3": "e", "4": "a", "5": "s", "7": "t", "@": "a", "$": "s"})
 _SPACED_LETTERS = re.compile(r"\b(?:[a-z] ){3,}[a-z]\b")
+# Homoglifos: letras griegas y cirílicas que se ven como latinas (NFKC no las convierte).
+_CONFUSABLES = str.maketrans({
+    "а": "a", "в": "b", "е": "e", "к": "k", "м": "m", "н": "h", "о": "o", "р": "p", "с": "c", "т": "t",
+    "у": "y", "х": "x", "і": "i", "ј": "j", "ѕ": "s", "ԁ": "d", "һ": "h", "ӏ": "l", "ԛ": "q", "ԝ": "w",
+    "α": "a", "β": "b", "ε": "e", "η": "n", "ι": "i", "κ": "k", "μ": "u", "ν": "v", "ο": "o", "ρ": "p",
+    "τ": "t", "υ": "u", "χ": "x", "ς": "c", "σ": "o", "ω": "w", "ζ": "z",
+})
 _SPACES = re.compile(r"\s+")
 
 
@@ -33,7 +40,7 @@ def clean(text: str) -> str:
 
 def fold(text: str, *, leet: bool = True) -> str:
     """Forma canónica solo para buscar patrones: resiste mayúsculas, tildes, leetspeak y letras espaciadas."""
-    text = clean(text).lower()
+    text = clean(text).lower().translate(_CONFUSABLES)
     text = "".join(c for c in unicodedata.normalize("NFD", text) if unicodedata.category(c) != "Mn")
     if leet:
         text = text.translate(_LEET)

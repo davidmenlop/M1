@@ -16,13 +16,13 @@ input:
     - id: ignorar_instrucciones
       folded: '\b(ignora\w*|ignore|olvida\w*|olvide|esqueca|forget|disregard|omiti\w*|omite|desestima\w*|saltea\w*)\b.{0,40}\b(instruccion\w*|regla\w*|indicacion\w*|instructions?|rules?|instrucoes|regras|anterior\w*|previa\w*|previous|above|prior)\b'
     - id: cambio_de_rol
-      folded: '\b(a partir de ahora|desde ahora|de ahora en mas|from now on|a partir de agora)\b.{0,30}\b(sos|eres|seras|actua\w*|responde|respondas|you are|you will|act|answer|respond|tu (nuevo )?rol|ignora\w*)\b'
+      folded: '\b(a partir de ahora|desde ahora|desde este momento|de aca en adelante|de ahora en mas|from now on|from this point on|a partir de agora)\b.{0,30}\b(sos|eres|seras|actua\w*|responde|respondas|you are|you will|act|answer|respond|tu (nuevo )?rol|ignora\w*)\b'
     - id: actuar_como
       folded: '\b(actua|actuar|actuas|comportate|hace de cuenta|finge|fingi|pretend|act as|roleplay|role play|juguemos a que)\b.{0,25}\b(como|que sos|que eres|as|to be)\b'
     - id: jailbreak
       folded: '\b(do anything now|modo (desarrollador|developer|dios|god|dan|sin restricciones|sin filtros)|developer mode|jailbreak\w*)\b'
     - id: exfiltracion
-      folded: '\b(system prompt|prompt (del|de) sistema|prompt (inicial|original|completo|oculto)|mensaje (del|de) sistema|(tus|sus|las) instrucciones (iniciales|internas|originales|ocultas|del sistema|de sistema|previas|completas)|your (instructions|system prompt|prompt|rules)|tu prompt|tus reglas internas)\b'
+      folded: '\b(system prompt|prompt (del|de) sistema|prompt (inicial|original|completo|oculto)|mensaje (del|de) sistema|(tus|sus|las) instrucciones (iniciales|internas|originales|ocultas|del sistema|de sistema|previas|completas)|your (initial |original |system |hidden |full )?(instructions|system prompt|prompt|rules)|(initial|original|system|hidden) instructions|tu prompt|tus reglas internas)\b'
     - id: mensaje_al_modelo
       folded: '\b(nota|mensaje|instruccion\w*) (para|al) (el )?(asistente|modelo|bot|ia|chatbot|llm)\b|\b(note|message|instructions?) (to|for) the (assistant|ai|model|bot)\b|\b(nueva|nuevas|new) (instruccion\w*|instructions?|reglas?|rules?)\b\s*:'
     - id: dictar_salida
@@ -63,7 +63,11 @@ output:
   # que no estaban en la consulta.
   unverified:
     - id: politica_comercial
-      folded: '(?<!si )\b(ofrecemos|tenemos|contamos con|hay|existen?|aplicamos|otorgamos|brindamos)\b (un |una |unos |unas |algun\w* )?(descuento|promocion|bonificacion|precio especial)\w*'
+      folded: '(?<!si )\b(ofrecemos|ofreceremos|tenemos|contamos con|hay|existen?|aplicamos|aplicaremos|otorgamos|otorgaremos|brindamos|daremos|bonificaremos|(le|te) corresponde)\b (un |una |unos |unas |algun\w* |el |la )?(\d+ ?% de )?(descuento|promocion|bonificacion|precio especial|compensacion)\w*'
+    # Compromisos con números, plazos o descuentos. No admite la excepción "estaba en la
+    # consulta": un atacante puede escribir la promesa en su propio mensaje (adv-09, Fase 9).
+    - id: compromiso
+      folded: '\b(se (le|te) devolvera|(le|te)? ?devolveremos|(le|te) devolvemos|reintegraremos|(le|te) reintegramos|(le|te) otorgaremos|(le|te) daremos|(le|te) confirmamos que)\b.{0,80}\b(el doble|\d+ ?%|\d+ (horas|hs|dias)|descuento|bonificacion|compensacion)'
     - id: porcentaje
       folded: '\b\d{1,3}([.,]\d+)? ?%'
       unless_in_query: true

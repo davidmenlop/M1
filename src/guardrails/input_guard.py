@@ -11,6 +11,8 @@ Orden de las capas:
 
 from __future__ import annotations
 
+import base64
+import binascii
 import re
 from dataclasses import dataclass
 
@@ -19,6 +21,21 @@ from src.guardrails.rules import GuardrailRules, clean, variants
 _SENTENCES = re.compile(r"(?<=[.!?])\s+|\n+")
 _DIGIT_RUN = re.compile(r"(?<!\d)(?:\d[ -]?){12,18}\d(?!\d)")
 _WORD = re.compile(r"[^\W\d_]{2,}")
+_BASE64 = re.compile(r"[A-Za-z0-9+/]{24,}={0,2}")
+
+
+def decoded_payloads(text: str) -> list[str]:
+    """Texto oculto en base64: si un bloque decodifica a texto legible, se revisa como cualquier otro."""
+    payloads = []
+    for blob in _BASE64.findall(text):
+        try:
+            decoded = base64.b64decode(blob + "=" * (-len(blob) % 4), validate=True).decode("utf-8")
+        except (binascii.Error, UnicodeDecodeError):
+            continue
+        if decoded.isprintable() and len(_WORD.findall(decoded)) >= 3:
+            payloads.append(decoded)
+    return payloads
+
 
 ALLOW, SANITIZE, BLOCK = "allow", "sanitize", "block"
 
@@ -83,6 +100,9 @@ def check_input(query: str, rules: GuardrailRules) -> InputVerdict:
     kept, removed = [], 0
     for sentence in _SENTENCES.split(text):
         hits = [rule.id for rule in rules.injection if rule.search(sentence, variants(sentence))]
+        for payload in decoded_payloads(sentence):
+            if any(rule.search(payload, variants(payload)) for rule in rules.injection):
+                hits.append("codificado")
         if hits:
             removed += 1
             flags.extend(hit for hit in hits if hit not in flags)

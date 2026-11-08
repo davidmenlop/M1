@@ -23,7 +23,7 @@ from src.schemas import MAX_ACTIONS, Category, TriageResponse
 
 INJECTION_FLAGS = {
     "ignorar_instrucciones", "cambio_de_rol", "actuar_como", "jailbreak", "exfiltracion",
-    "mensaje_al_modelo", "dictar_salida", "etiqueta_de_rol", "delimitador",
+    "mensaje_al_modelo", "dictar_salida", "etiqueta_de_rol", "delimitador", "codificado",
 }
 MODERATION_FLAGS = {"violencia", "autolesion"}
 SENSITIVE_FLAGS = {"clave", "codigo_seguridad", "tarjeta"}
