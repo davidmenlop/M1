@@ -7,10 +7,11 @@ import json
 import logging
 import time
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 from pydantic import ValidationError
 
+from src.cache import ResponseCache, cache_key
 from src.config import ModelConfig
 from src.guardrails import GuardReport, Guardrails, InputVerdict
 from src.observability.pricing import compute_cost
@@ -107,6 +108,8 @@ class TriageResult:
     cost_usd: float
     error: str | None = field(default=None)
     guard: GuardReport | None = field(default=None)
+    cache: str | None = field(default=None)          # hit | miss | None (caché desactivada)
+    cache_saved_usd: float = field(default=0.0)      # costo del request original, en un hit
 
 
 class TriagePipeline:
@@ -118,6 +121,7 @@ class TriagePipeline:
         max_retries: int,
         timeout_s: float,
         guardrails: Guardrails | None = None,
+        cache: ResponseCache | None = None,
     ) -> None:
         if max_retries < 0:
             raise ValueError("max_retries debe ser >= 0")
@@ -127,6 +131,7 @@ class TriagePipeline:
         self._max_retries = max_retries
         self._timeout_s = timeout_s
         self._guardrails = guardrails
+        self._cache = cache
 
     def run(self, query: str) -> TriageResult:
         request_id = uuid.uuid4().hex
@@ -137,6 +142,17 @@ class TriagePipeline:
             logger.warning("guardrail de entrada: consulta bloqueada (%s)", ", ".join(verdict.flags))
             return self._result(request_id, self._guardrails.blocked_response(), True, 0, usage, started,
                                 None, report)
+        key = None
+        if self._cache is not None:
+            key = cache_key(query, provider=self._provider.name, model=self._model, prompt=self._prompt,
+                            guardrails_sha256=self._guardrails.sha256 if self._guardrails else None)
+            entry = self._cache.get(key)
+            if entry is not None:
+                if report is not None:
+                    report.output_flags = entry.output_flags
+                result = self._result(request_id, entry.response, True, 0, usage, started, None, report)
+                return replace(result, cache="hit", cache_saved_usd=entry.original_cost_usd)
+
         text = verdict.text if verdict is not None else query
         system, base_user = self._prompt.render(text)
         attempts = 0
@@ -170,7 +186,12 @@ class TriagePipeline:
                 continue
 
             validated = self._check_output(validated, query, verdict, report)
-            return self._result(request_id, validated, True, attempts, usage, started, None, report)
+            result = self._result(request_id, validated, True, attempts, usage, started, None, report)
+            if self._cache is not None and key is not None:
+                self._cache.put(key, validated, cost_usd=result.cost_usd, latency_s=result.latency_s,
+                                output_flags=report.output_flags if report else ())
+                result = replace(result, cache="miss")
+            return result
 
         logger.error("sin respuesta válida tras %d intentos; se usa fallback", attempts)
         fallback = TriageResponse(

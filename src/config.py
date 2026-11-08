@@ -41,6 +41,9 @@ class Settings:
     request_timeout_s: float
     metrics_path: Path
     log_level: str
+    cache_enabled: bool = True
+    cache_dir: Path = REPO_ROOT / "data" / "cache"
+    cache_ttl_s: float = 7 * 24 * 3600
 
 
 def _env(name: str, default: str) -> str:
@@ -77,6 +80,19 @@ def load_settings() -> Settings:
     if not metrics_path.is_absolute():
         metrics_path = REPO_ROOT / metrics_path
 
+    cache_enabled = _env("CACHE_ENABLED", "true").lower()
+    if cache_enabled not in ("true", "false"):
+        raise ConfigError("CACHE_ENABLED debe ser true o false")
+    try:
+        cache_ttl_s = float(_env("CACHE_TTL_S", str(7 * 24 * 3600)))
+    except ValueError as exc:
+        raise ConfigError("CACHE_TTL_S debe ser numérico") from exc
+    if cache_ttl_s <= 0:
+        raise ConfigError("CACHE_TTL_S debe ser > 0")
+    cache_dir = Path(_env("CACHE_DIR", "data/cache"))
+    if not cache_dir.is_absolute():
+        cache_dir = REPO_ROOT / cache_dir
+
     return Settings(
         default_provider=_env("DEFAULT_PROVIDER", str(providers["default_provider"])),
         default_prompt_version=_env("DEFAULT_PROMPT_VERSION", "v4"),
@@ -84,6 +100,9 @@ def load_settings() -> Settings:
         request_timeout_s=timeout_s,
         metrics_path=metrics_path,
         log_level=log_level,
+        cache_enabled=cache_enabled == "true",
+        cache_dir=cache_dir,
+        cache_ttl_s=cache_ttl_s,
     )
 
 

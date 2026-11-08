@@ -7,6 +7,7 @@ import json
 import logging
 import sys
 
+from src.cache import ResponseCache
 from src.config import DEFAULT_MODEL_KEY, ConfigError, load_model_config, load_settings
 from src.guardrails import GuardrailConfigError, Guardrails
 from src.observability.metrics import append_metric, build_record
@@ -32,6 +33,8 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
     )
     parser.add_argument("--prompt", help="versión del prompt, por ejemplo v1 (por defecto: DEFAULT_PROMPT_VERSION)")
     parser.add_argument("--pretty", action="store_true", help="imprime el JSON indentado")
+    parser.add_argument("--no-cache", action="store_true",
+                        help="no lee ni escribe la caché de respuestas (data/cache/)")
     parser.add_argument("--no-guardrails", action="store_true",
                         help="desactiva los guardrails de entrada y salida (solo para medir su efecto)")
     return parser.parse_args(argv)
@@ -78,17 +81,20 @@ def main(argv: list[str] | None = None) -> int:
         max_retries=settings.max_retries,
         timeout_s=settings.request_timeout_s,
         guardrails=guardrails,
+        cache=None if args.no_cache or not settings.cache_enabled
+        else ResponseCache(settings.cache_dir, settings.cache_ttl_s),
     )
     try:
         result = pipeline.run(query)
     except ProviderFatalError as exc:
         return _fail(f"el proveedor '{provider_name}' rechazó la solicitud: {exc}")
     logger.info(
-        "request=%s provider=%s attempts=%d success=%s cost_usd=%.8f latency_s=%.4f",
+        "request=%s provider=%s attempts=%d success=%s cache=%s cost_usd=%.8f latency_s=%.4f",
         result.request_id,
         result.provider,
         result.attempts,
         result.success,
+        result.cache or "off",
         result.cost_usd,
         result.latency_s,
     )

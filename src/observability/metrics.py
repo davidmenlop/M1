@@ -35,6 +35,8 @@ def build_record(result: TriageResult, query: str) -> dict[str, Any]:
         "cost_usd": result.cost_usd,
         "error": result.error,
         "guardrails": result.guard.to_dict() if result.guard else None,
+        "cache": result.cache,
+        "cache_saved_usd": result.cache_saved_usd,
     }
 
 
