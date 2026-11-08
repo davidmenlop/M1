@@ -174,8 +174,12 @@ def compare(paths: list[Path]) -> int:
     attacks = {c["id"]: c for c in load_attacks()}
     guard = Guardrails.from_config()
     loaded = [rejudge(json.loads(p.read_text(encoding="utf-8")), attacks, guard) for p in sorted(paths)]
-    labels = [f"{d['meta']['model_id']} · {d['meta']['prompt_version']} · "
-              f"{'con' if d['meta']['guardrails']['enabled'] else 'sin'} guardrails" for d in loaded]
+    def label(meta: dict[str, Any]) -> str:
+        guard = meta["guardrails"]
+        rules = f"guardrails {guard['sha256'][:7]}" if guard["enabled"] else "sin guardrails"
+        return f"{meta['model_id']} · {meta['prompt_version']} · {rules}"
+
+    labels = [label(d["meta"]) for d in loaded]
     print("| ataque | técnica | " + " | ".join(labels) + " |")
     print("|---|---|" + "---|" * len(labels))
     for attack_id, case in attacks.items():
