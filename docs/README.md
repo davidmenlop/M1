@@ -5,7 +5,7 @@
 > De un repositorio vacío a un servicio multi-proveedor, con contrato validado,
 > evals ejecutables, guardrails y métricas auditables.
 
-**Estado del manual:** v0.12 — capítulos 0 a 11 completos.
+**Estado del manual:** v1.0 — completo, capítulos 0 a 12.
 **Última actualización:** 2026-11-04.
 **Fuente de verdad:** el código del repositorio. Si el manual y el código difieren, gana el código; el manual se corrige en el mismo commit.
 
@@ -47,7 +47,7 @@ La regla es simple: **ninguna decisión técnica se sostiene con intuición**. S
 | [9 — Guardrails](09-fase-8-guardrails.md) | Fase 8 | Entrada, salida, capas y medición de su efecto | ✅ |
 | [10 — Suite adversarial](10-fase-9-adversarial.md) | Fase 9 | 10 ataques congelados, capas aisladas, mitigación medida | ✅ |
 | [11 — Extras](11-fase-10-extras.md) | Fase 10 | Caché MD5, comparativa de modelos | ✅ |
-| 12 — Cierre | Fase 11 | README final, clon limpio, entrega | ⏳ |
+| [12 — Cierre](12-fase-11-cierre.md) | Fase 11 | Clon limpio, checklist de entrega, rúbrica, pendientes | ✅ |
 
 **Apéndices**
 
@@ -73,12 +73,12 @@ El manual es Markdown plano, sin dependencias. Si querés un PDF o un `.docx`:
 ```bash
 # PDF con tabla de contenidos
 pandoc docs/00-introduccion.md docs/01-fase-0-configuracion.md docs/02-fase-1-contrato.md \
-  docs/03-fase-2-cli-y-mock.md docs/04-fase-3-multi-proveedor.md docs/05-fase-4-prompts.md docs/06-fase-5-dataset.md docs/07-fase-6-evals.md docs/08-fase-7-iteracion.md docs/09-fase-8-guardrails.md docs/10-fase-9-adversarial.md docs/11-fase-10-extras.md docs/apendice-a-decisiones.md docs/apendice-b-glosario.md \
+  docs/03-fase-2-cli-y-mock.md docs/04-fase-3-multi-proveedor.md docs/05-fase-4-prompts.md docs/06-fase-5-dataset.md docs/07-fase-6-evals.md docs/08-fase-7-iteracion.md docs/09-fase-8-guardrails.md docs/10-fase-9-adversarial.md docs/11-fase-10-extras.md docs/12-fase-11-cierre.md docs/apendice-a-decisiones.md docs/apendice-b-glosario.md \
   -o manual.pdf --toc --number-sections
 
 # DOCX
 pandoc docs/00-introduccion.md docs/01-fase-0-configuracion.md docs/02-fase-1-contrato.md \
-  docs/03-fase-2-cli-y-mock.md docs/04-fase-3-multi-proveedor.md docs/05-fase-4-prompts.md docs/06-fase-5-dataset.md docs/07-fase-6-evals.md docs/08-fase-7-iteracion.md docs/09-fase-8-guardrails.md docs/10-fase-9-adversarial.md docs/11-fase-10-extras.md \
+  docs/03-fase-2-cli-y-mock.md docs/04-fase-3-multi-proveedor.md docs/05-fase-4-prompts.md docs/06-fase-5-dataset.md docs/07-fase-6-evals.md docs/08-fase-7-iteracion.md docs/09-fase-8-guardrails.md docs/10-fase-9-adversarial.md docs/11-fase-10-extras.md docs/12-fase-11-cierre.md \
   -o manual.docx --toc
 ```
 
@@ -93,6 +93,7 @@ pandoc docs/00-introduccion.md docs/01-fase-0-configuracion.md docs/02-fase-1-co
 | 0.1 | 2026-10-22 | Capítulos 0–2, apéndices A y B |
 | 0.2 | 2026-10-27 | Capítulo 3 (Fase 2): CLI, mock, pipeline, métricas. ADR-012 a ADR-014 |
 | 0.3 | 2026-10-28 | Proveedor Anthropic verificado con llamada real. Temperatura opcional por modelo. ADR-015 a ADR-017 |
+| 1.0 | 2026-11-08 | Capítulo 12 (Fase 11): clon limpio, README final, checklist de entrega. Manual completo |
 | 0.12 | 2026-11-08 | Capítulo 11 (Fase 10): caché MD5 y comparativa de modelos. ADR-033 |
 | 0.11 | 2026-11-08 | Capítulo 10 (Fase 9): suite adversarial, guardrails v2. ADR-032 |
 | 0.10 | 2026-11-05 | Capítulo 9 (Fase 8): guardrails de entrada y salida, medición offline y con el ganador. ADR-030 y ADR-031 |

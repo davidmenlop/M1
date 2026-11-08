@@ -162,4 +162,4 @@ Todos los números salen de corridas ya guardadas en `evals/results/`; esta secc
 
 ---
 
-**Anterior:** [Capítulo 10 — Suite adversarial](10-fase-9-adversarial.md) · **Siguiente:** Capítulo 12 — Cierre (Fase 11, pendiente)
+**Anterior:** [Capítulo 10 — Suite adversarial](10-fase-9-adversarial.md) · **Siguiente:** [Capítulo 12 — Cierre](12-fase-11-cierre.md)
